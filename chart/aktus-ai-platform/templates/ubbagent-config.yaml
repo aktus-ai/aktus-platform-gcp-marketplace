@@ -1,0 +1,55 @@
+# charts/aktus-ai-platform/templates/ubbagent-config.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-ubbagent-config
+  labels:
+    app.kubernetes.io/name: {{ .Release.Name }}
+data:
+  config.yaml: |-
+    identities:
+    - name: gcp
+      gcp:
+        encodedServiceAccountKey: ${reporting_key}
+
+    # Metrics to be reported
+    metrics:
+    - name: aktus_api_requests
+      type: int
+      endpoints:
+      - name: servicecontrol
+      aggregation:
+        bufferSeconds: 60
+      monitoredResource: {{"{"}}gcp_kubernetes_engine_service{{"}"}}
+
+    - name: aktus_inference_time_seconds
+      type: double
+      endpoints:
+      - name: servicecontrol
+      aggregation:
+        bufferSeconds: 60
+      monitoredResource: {{"{"}}gcp_kubernetes_engine_service{{"}"}}
+
+    - name: aktus_storage_bytes
+      type: int
+      endpoints:
+      - name: servicecontrol
+      aggregation:
+        bufferSeconds: 60
+      monitoredResource: {{"{"}}gcp_kubernetes_engine_service{{"}"}}
+
+    # Reporting endpoints
+    endpoints:
+    - name: servicecontrol
+      servicecontrol:
+        identity: gcp
+        serviceName: ${service_name}
+        consumerId: ${consumer_id}
+
+    # Agent configuration
+    agent:
+      reportingInterval: 60s
+      onError: retry
+      endpointsCache:
+        expirationTime: 1m
+      endpoint_overrides: {}
