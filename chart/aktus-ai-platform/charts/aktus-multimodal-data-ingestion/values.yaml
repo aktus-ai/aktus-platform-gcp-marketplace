@@ -1,0 +1,69 @@
+# aktus-multimodal-data-ingestion-service/values.yaml
+aktusMdi:
+  image: us-central1-docker.pkg.dev/aktus-393100/aktus-ai/dev/service-ocr
+  imagePullPolicy: Always
+  platform: linux/amd64
+  serviceAccount: aktus-ai-platform-sa
+  ports:
+    flower: 5555
+    ocr: 5315
+    layout: 5316
+  rabbitmq:
+    username: "guest"
+    password: "guest"
+    host: "rabbitmq"
+    port: "5672"
+    vhost: "/"
+  redis:
+    host: "redis"
+    port: "6379"
+  modelInference:
+    host: "aktus-inference:50051"
+  vectorEmbedding:
+    host: "aktus-embedding:8080"
+  paths:
+    docUpload: "/document_upload"
+    docProcessing: "/doc_processing"
+    extractedData: "/extracted_data"
+    models: "/models"
+  
+  # GCS storage configuration
+  storage:
+    models:
+      bucketName: aktus-models
+      readOnly: true
+      mountOptions: "implicit-dirs,file-mode=0666,dir-mode=0777"
+    docProcessing:
+      bucketName: "aktus-ai-platform-doc-proc"
+      readOnly: false
+      mountOptions: "implicit-dirs,file-mode=0666,dir-mode=0777"
+    extractedData:
+      bucketName: "aktus-ai-platform-ext-data"
+      readOnly: false
+      mountOptions: "implicit-dirs,file-mode=0666,dir-mode=0777"
+    docUpload:
+      bucketName: "aktus-ai-platform-doc-upload"
+      readOnly: false
+      mountOptions: "implicit-dirs,file-mode=0666,dir-mode=0777"
+  
+  resources:
+    requests:
+      cpu: "4000m"
+      memory: "16Gi"
+  
+  config:
+    flower:
+      unauthenticatedApi: "true"
+    chartClassifier:
+      modelId: "korazer/chart-test-classify"
+      defaultTargetClassIdx: "0"
+    docClassifier:
+      modelId: "naver-clova-ix/donut-base-finetuned-rvlcdip"
+      defaultDevice: "cuda"
+    tableTransformer:
+      defaultDevice: "detect"
+    tableParser:
+      defaultDevice: "detect"
+    yolo:
+      modelPath: "/models/yolo/yolov10x_best.pt"
+      defaultDevice: "cuda"
