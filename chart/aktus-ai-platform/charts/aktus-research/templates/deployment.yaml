@@ -1,0 +1,97 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: aktus-research
+  annotations:
+    gke-gcsfuse/volumes: "true"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: aktus-research-service
+  template:
+    metadata:
+      annotations:
+        gke-gcsfuse/volumes: "true"
+      labels:
+        app: aktus-research-service
+    spec:
+      terminationGracePeriodSeconds: 60
+      
+      serviceAccountName: aktus-ai-platform-sa
+      containers:
+        - name: aktus-research-service
+          image: {{ .Values.aktusResearch.image }}
+          imagePullPolicy: {{ .Values.aktusResearch.imagePullPolicy }}
+          ports:
+            - containerPort: {{ .Values.aktusResearch.port }}
+              name: http
+          env:
+            - name: EXPERIMENTAL
+              value: "true"
+            - name: CREDENTIALS_USERNAME
+              value: "{{ .Values.aktusResearch.auth.username }}"
+            - name: CREDENTIALS_PASSWORD
+              value: "{{ .Values.aktusResearch.auth.password }}"
+            - name: UVICORN_HOST
+              value: "{{ .Values.aktusResearch.uvicorn.host }}"
+            - name: UVICORN_PORT
+              value: "{{ .Values.aktusResearch.uvicorn.port }}"
+            - name: UVICORN_LOG_LEVEL
+              value: "{{ .Values.aktusResearch.uvicorn.logLevel }}"
+            - name: UVICORN_TIMEOUT_KEEP_ALIVE
+              value: "{{ .Values.aktusResearch.uvicorn.timeoutKeepAlive }}"
+            - name: OPENAI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: aktus-openai-secret
+                  key: aktus-openai-key
+            - name: AKTUS_CHAT_SERVER_ADDRESS
+              value: "{{ .Values.aktusResearch.modelInference.address }}"
+            - name: DOC_UPLOAD_DIR
+              value: "{{ .Values.aktusResearch.paths.docUpload }}"
+            - name: DOC_IMAGE_DIR
+              value: "{{ .Values.aktusResearch.paths.docImage }}"
+            - name: EXTRACTED_DATA_DIR
+              value: "{{ .Values.aktusResearch.paths.extractedData }}"
+            - name: ITERDRAG_ENDPOINT
+              value: "http://{{ .Values.aktusResearch.embeddingService.host }}/iterdrag/"
+          volumeMounts:
+            - name: document-upload
+              mountPath: {{ .Values.aktusResearch.paths.docUpload }}
+            - name: doc-processing
+              mountPath: {{ .Values.aktusResearch.paths.docImage }}
+            - name: extracted-data
+              mountPath: {{ .Values.aktusResearch.paths.extractedData }}
+          resources:
+            {{- toYaml .Values.aktusResearch.resources | nindent 12 }}
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: {{ .Values.healthcheck.initialDelaySeconds }}
+            periodSeconds: {{ .Values.healthcheck.periodSeconds }}
+            timeoutSeconds: {{ .Values.healthcheck.timeoutSeconds }}
+            failureThreshold: {{ .Values.healthcheck.failureThreshold }}
+      volumes:
+        - name: document-upload
+          csi:
+            driver: gcsfuse.csi.storage.gke.io
+            readOnly: false
+            volumeAttributes:
+              bucketName: {{ .Values.aktusResearch.storage.documentUpload.bucketName }}
+              mountOptions: "{{ .Values.aktusResearch.storage.documentUpload.mountOptions }}"
+        - name: doc-processing
+          csi:
+            driver: gcsfuse.csi.storage.gke.io
+            readOnly: false
+            volumeAttributes:
+              bucketName: {{ .Values.aktusResearch.storage.docProcessing.bucketName }}
+              mountOptions: "{{ .Values.aktusResearch.storage.docProcessing.mountOptions }}"
+        - name: extracted-data
+          csi:
+            driver: gcsfuse.csi.storage.gke.io
+            readOnly: false
+            volumeAttributes:
+              bucketName: {{ .Values.aktusResearch.storage.extractedData.bucketName }}
+              mountOptions: "{{ .Values.aktusResearch.storage.extractedData.mountOptions }}"

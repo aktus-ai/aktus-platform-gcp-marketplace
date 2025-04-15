@@ -1,0 +1,57 @@
+aktusResearch:
+  image: us-central1-docker.pkg.dev/aktus-393100/aktus-ai/dev/service-chat
+  imagePullPolicy: Always
+  port: 8080
+  service:
+    type: LoadBalancer
+    port: 8080
+  
+  auth:
+    username: "guest"
+    password: "guest"
+  
+  uvicorn:
+    host: "0.0.0.0"
+    port: "8080"
+    logLevel: "debug"
+    timeoutKeepAlive: "3600"
+  
+  modelInference:
+    address: ""
+  
+  embeddingService:
+    host: "aktus-embedding:8080"
+  
+  paths:
+    docUpload: "/document_upload"
+    docImage: "/doc_processing" 
+    extractedData: "/extracted_data"
+  
+  # GCS storage configuration
+  storage:
+    documentUpload:
+      bucketName: "aktus-ai-platform-doc-upload"
+      readOnly: false
+      mountOptions: "implicit-dirs,file-mode=0666,dir-mode=0777"
+    docProcessing:
+      bucketName: "aktus-ai-platform-doc-proc"
+      readOnly: false
+      mountOptions: "implicit-dirs,file-mode=0666,dir-mode=0777"
+    extractedData:
+      bucketName: "aktus-ai-platform-ext-data"
+      readOnly: false
+      mountOptions: "implicit-dirs,file-mode=0666,dir-mode=0777"
+  
+  resources:
+    requests:
+      cpu: "4000m"
+      memory: "4Gi"
+
+healthcheck:
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 60
+  failureThreshold: 20
+
+serviceAccount:
+  name: "aktus-ai-platform-sa"
