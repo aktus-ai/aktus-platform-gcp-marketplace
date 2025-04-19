@@ -1,6 +1,6 @@
 # aktus-embedding-service/values.yaml
 aktusEmbedding:
-  image: us-central1-docker.pkg.dev/aktus-393100/aktus-ai/dev/service-vector-embedding-worker-timeout-debug
+  image: us-docker.pkg.dev/aktus-ai-platform-public/aktus-platform-marketplace/aktus-embedding:v1.0.0
   imagePullPolicy: Always
   serviceAccount: aktus-ai-platform-sa
   port: 8080
@@ -21,18 +21,27 @@ aktusEmbedding:
     docUpload: "/document_upload"
     docProcessing: "/doc_processing"
     chromaDb: "/chroma"
-    
-  storage:
-    extractedData:
-      bucketName: aktus-ai-platform
-      readOnly: false
-      mountOptions: "implicit-dirs,file-mode=0666,dir-mode=0777"
       
   resources:
     requests:
-      cpu: "8000m"
-      memory: "16Gi"
+      cpu: "4000m"
+      memory: "8Gi"
       ephemeral-storage: "5Gi"
+  
+  # GCS storage configuration
+  storage:
+    extractedData:
+      bucketName: "aktus-platform-extracted-data"
+      readOnly: false
+      mountOptions: "implicit-dirs,file-mode=0666,dir-mode=0777"
+    docUpload:
+      bucketName: "aktus-platform-doc-upload" 
+      readOnly: false
+      mountOptions: "implicit-dirs,file-mode=0666,dir-mode=0777"
+    docProcessing:
+      bucketName: "aktus-platform-doc-processing"
+      readOnly: false
+      mountOptions: "implicit-dirs,file-mode=0666,dir-mode=0777"
       
 storage:
   chroma:

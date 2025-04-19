@@ -1,6 +1,6 @@
 # aktus-multimodal-data-ingestion-service/values.yaml
 aktusMdi:
-  image: us-central1-docker.pkg.dev/aktus-393100/aktus-ai/dev/service-ocr
+  image: us-docker.pkg.dev/aktus-ai-platform-public/aktus-platform-marketplace/aktus-multimodal-data-ingestion:v1.0.0
   imagePullPolicy: Always
   platform: linux/amd64
   serviceAccount: aktus-ai-platform-sa

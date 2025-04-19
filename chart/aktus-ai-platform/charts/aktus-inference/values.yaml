@@ -1,12 +1,13 @@
 # service-model-inference/values.yaml
 aktusInference:
-  image: us-central1-docker.pkg.dev/aktus-393100/aktus-ai/dev/service-model-inference
+  image: us-docker.pkg.dev/aktus-ai-platform-public/aktus-platform-marketplace/aktus-inference:v1.0.0
   nodeSelector: 
     cloud.google.com/gke-accelerator: nvidia-tesla-a100
   imagePullPolicy: Always
   platform: linux/amd64
   grpcPort: 50051
-  serviceAccount: aktus-ai-platform-sa
+  serviceAccount: 
+    name: aktus-ai-platform-sa
   
   # Model configuration paths
   modelConfig:

@@ -1,6 +1,6 @@
 # aktus-db-manager/values.yaml
 aktusDatabase:
-  image: us-central1-docker.pkg.dev/aktus-393100/aktus-ai/dev/service-db-manager
+  image: us-docker.pkg.dev/aktus-ai-platform-public/aktus-platform-marketplace/aktus-db-manager:v1.0.0
   imagePullPolicy: Always
   port: 80
   resources:
