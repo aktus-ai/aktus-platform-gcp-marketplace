@@ -2,12 +2,9 @@
 
 FROM gcr.io/cloud-marketplace-tools/k8s/deployer_helm/onbuild
 
-COPY schema.yaml /data/schema.yaml
-COPY chart/ /data/chart/
-COPY apptest/ /data-test/
-
 # Set metadata
 LABEL maintainer="Aktus AI <support@aktus.ai>"
+LABEL com.googleapis.cloudmarketplace.product.service.name="services/aktus-ai-platform"
 
 # Set environment variables
 ENV WAIT_FOR_READY_TIMEOUT 1800
