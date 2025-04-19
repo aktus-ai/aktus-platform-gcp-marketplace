@@ -3,7 +3,7 @@
 # Add top-level block to explicitly set version for testing
 x-google-marketplace:
   # Match the main schema version
-  publishedVersion: "0.1.0"
+  publishedVersion: "1.0.0"
 
 properties:
   name:
@@ -51,6 +51,25 @@ properties:
         length: 16
         includeSymbols: false
         base64: false
+        
+  aktusPostgres.database:
+    type: string
+    title: PostgreSQL Database
+    description: Name of the PostgreSQL database
+    default: root
+    
+  # Storage configurations
+  aktusPostgres.persistence.size:
+    type: string
+    title: PostgreSQL Storage Size
+    description: Size of the PostgreSQL persistent volume
+    default: 10Gi
+  
+  storage.chroma.size:
+    type: string
+    title: Vector Database Storage Size
+    description: Size of the persistent volume for the vector database
+    default: 10Gi
 
   # Minimal services for testing
   rabbitmq.enabled:
@@ -91,6 +110,50 @@ properties:
     type: boolean
     title: Enable Research Service
     default: false
+    
+  # GCS storage bucket configurations
+  aktusInference.storage.models.bucketName:
+    type: string
+    title: Models Storage Bucket
+    description: GCS bucket name for storing ML models
+    default: test-aktus-models
+  
+  aktusInference.storage.docUpload.bucketName:
+    type: string
+    title: Document Upload Bucket
+    description: GCS bucket name for document uploads
+    default: test-aktus-doc-upload
+  
+  aktusInference.storage.docProcessing.bucketName:
+    type: string
+    title: Document Processing Bucket
+    description: GCS bucket name for document processing
+    default: test-aktus-doc-proc
+    
+  aktusInference.storage.extractedData.bucketName:
+    type: string
+    title: Extracted Data Bucket
+    description: GCS bucket name for extracted document data
+    default: test-aktus-ext-data
+
+  billing.enabled:
+    type: boolean
+    title: Enable Usage-Based Billing
+    description: Enable tracking and reporting of usage metrics
+    default: true
+    
+  # API keys for external services
+  secrets.openaiApiKey:
+    type: string
+    title: OpenAI API Key
+    description: API key for OpenAI services
+    default: dummy-key
+    
+  secrets.huggingfaceLoginKey:
+    type: string
+    title: Hugging Face Login Key
+    description: Login key for accessing Hugging Face models
+    default: dummy-key
 
 required:
   - name
@@ -98,3 +161,20 @@ required:
   - serviceAccount
   - aktusPostgres.username
   - aktusPostgres.password
+  - aktusPostgres.database
+  - aktusPostgres.persistence.size
+  - storage.chroma.size
+  - rabbitmq.enabled
+  - redis.enabled
+  - aktus-inference-service.enabled
+  - aktus-multimodal-data-ingestion-service.enabled
+  - aktus-embedding-service.enabled
+  - aktus-database-service.enabled
+  - aktus-research-service.enabled
+  - aktusInference.storage.models.bucketName
+  - aktusInference.storage.docUpload.bucketName
+  - aktusInference.storage.docProcessing.bucketName
+  - aktusInference.storage.extractedData.bucketName
+  - billing.enabled
+  - secrets.openaiApiKey
+  - secrets.huggingfaceLoginKey
