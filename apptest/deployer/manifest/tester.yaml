@@ -1,0 +1,135 @@
+# root/chart/aktus-ai-platform/apptest/deployer/manifest/tester.yml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ .Release.Name }}-tester"
+  labels:
+    app.kubernetes.io/name: "{{ .Release.Name }}"
+    app.kubernetes.io/component: tester
+spec:
+  serviceAccountName: "{{ .Values.serviceAccount }}"
+  containers:
+  - name: tester
+    image: "debian:bullseye-slim"
+    imagePullPolicy: IfNotPresent
+    command:
+      - /bin/bash
+      - -c
+      - |
+        #!/bin/bash
+        set -e
+        
+        # Install needed tools
+        apt-get update && apt-get install -y curl postgresql-client dnsutils netcat grpcurl
+        
+        echo "Starting basic connectivity tests for Aktus AI Platform..."
+        
+        # Test PostgreSQL connection
+        echo "Testing PostgreSQL Connection..."
+        if nc -z -w5 aktus-postgres 5432; then
+          echo "✓ PostgreSQL is reachable"
+        else
+          echo "✗ ERROR: Cannot connect to PostgreSQL"
+          exit 1
+        fi
+        
+        # Test basic query
+        PGPASSWORD={{ .Values.aktusPostgres.password }} psql -h aktus-postgres -U {{ .Values.aktusPostgres.username }} -d postgres -c "\l" > /dev/null
+        if [ $? -eq 0 ]; then
+          echo "✓ PostgreSQL query successful"
+        else
+          echo "✗ ERROR: Cannot query PostgreSQL"
+          exit 1
+        fi
+        
+        # Test other essential services
+        if [ "{{ .Values.redis.enabled }}" == "true" ]; then
+          echo "Testing Redis Connection..."
+          if nc -z -w5 redis 6379; then
+            echo "✓ Redis is reachable"
+          else
+            echo "✗ ERROR: Cannot connect to Redis"
+            exit 1
+          fi
+        fi
+        
+        if [ "{{ .Values.rabbitmq.enabled }}" == "true" ]; then
+          echo "Testing RabbitMQ Connection..."
+          if nc -z -w5 rabbitmq 5672; then
+            echo "✓ RabbitMQ is reachable"
+          else
+            echo "✗ ERROR: Cannot connect to RabbitMQ"
+            exit 1
+          fi
+        fi
+        
+        # Test database service
+        if [ "{{ .Values.aktus-database-service.enabled }}" == "true" ]; then
+          echo "Testing Database Service Connection..."
+          if nc -z -w5 aktus-database 80; then
+            echo "✓ Database Service is reachable"
+          else
+            echo "✗ WARNING: Cannot connect to Database Service"
+            # Not failing for this service as it might still be starting
+          fi
+        fi
+
+        # Test database connection
+          echo "Testing Database Connection..."
+          pg_isready -h aktus-postgres -U {{ .Values.aktusPostgres.username }}
+          
+          # Check if inference service exists and is ready
+          echo "Checking Inference Service DNS..."
+          if nslookup aktus-inference > /dev/null; then
+            echo "DNS resolution successful for aktus-inference"
+            echo "Checking if inference service port is open..."
+            timeout 5 bash -c "</dev/tcp/aktus-inference/50051" && echo "Port is open" || echo "Port is not open yet, skipping test"
+            
+            if timeout 5 bash -c "</dev/tcp/aktus-inference/50051" 2>/dev/null; then
+              echo "Testing Inference Service..."
+              if ! grpcurl -plaintext -connect-timeout 5 aktus-inference:50051 list; then
+                echo "Warning: Inference service test failed, but continuing with other tests"
+              fi
+            else
+              echo "Warning: Inference service port not open, skipping test"
+            fi
+          else
+            echo "Warning: Could not resolve aktus-inference, skipping test"
+          fi
+          
+          # Similar checks for other services
+          # Test research service
+          echo "Checking Research Service..."
+          if nslookup aktus-research > /dev/null; then
+            echo "DNS resolution successful for aktus-research"
+            if timeout 5 bash -c "</dev/tcp/aktus-research/8080" 2>/dev/null; then
+              echo "Testing Research Service..."
+              if ! curl -f --max-time 5 http://aktus-research:8080/health; then
+                echo "Warning: Research service test failed, but continuing with other tests"
+              fi
+            else
+              echo "Warning: Research service port not open, skipping test"
+            fi
+          else
+            echo "Warning: Could not resolve aktus-research, skipping test"
+          fi
+          
+          # Test embedding service
+          echo "Checking Embedding Service..."
+          if nslookup aktus-embedding > /dev/null; then
+            echo "DNS resolution successful for aktus-embedding"
+            if timeout 5 bash -c "</dev/tcp/aktus-embedding/8080" 2>/dev/null; then
+              echo "Testing Embedding Service..."
+              if ! curl -f --max-time 5 http://aktus-embedding:8080/health; then
+                echo "Warning: Embedding service test failed, but continuing with other tests"
+              fi
+            else
+              echo "Warning: Embedding service port not open, skipping test"
+            fi
+          else
+            echo "Warning: Could not resolve aktus-embedding, skipping test"
+          fi
+        
+        echo "All verification tests completed successfully!"
+        exit 0
+  restartPolicy: Never

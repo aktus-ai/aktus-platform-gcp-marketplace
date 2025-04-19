@@ -1,0 +1,123 @@
+# Enable/disable services
+rabbitmq:
+  enabled: true
+  rabbitmq:
+    image: rabbitmq:3.13-management-alpine
+    username: guest
+    password: guest
+
+redis:
+  enabled: true
+  redis:
+    image: redis:7.2-alpine
+    persistence:
+      enabled: true
+      size: 50Gi
+      storageClass: standard-rwo
+      accessMode: ReadWriteOnce
+
+# Core Services
+aktus-database-service:
+  enabled: true
+  serviceAccount:
+    name: "{{ .Values.serviceAccount }}"
+  aktusDatabase:
+    image: us-central1-docker.pkg.dev/aktus-393100/aktus-ai/dev/service-db-manager:v0.1.0
+    dbConfig:
+      username: "{{ .Values.aktusPostgres.username }}"
+      password: "{{ .Values.aktusPostgres.password }}"
+      host: aktus-postgres
+      port: 5432
+      dbName: "{{ .Values.aktusPostgres.database }}"
+
+aktus-inference-service:
+  enabled: true
+  aktusInference:
+    image: us-central1-docker.pkg.dev/aktus-393100/aktus-ai/dev/service-model-inference:v0.2.0
+    serviceAccount: "{{ .Values.serviceAccount }}"
+    nodeSelector: 
+      cloud.google.com/gke-accelerator: nvidia-tesla-a100
+    storage:
+      models:
+        bucketName: "{{ .Values.aktusInference.storage.models.bucketName }}"
+      docUpload:
+        bucketName: "{{ .Values.aktusInference.storage.docUpload.bucketName }}"
+      docProcessing:
+        bucketName: "{{ .Values.aktusInference.storage.docProcessing.bucketName }}"
+
+# Application Services
+aktus-research-service:
+  enabled: true
+  serviceAccount:
+    name: "{{ .Values.serviceAccount }}"
+  aktusResearch:
+    image: us-central1-docker.pkg.dev/aktus-393100/aktus-ai/dev/service-chat:v0.1.0
+    modelInference:
+      address: "aktus-inference:50051"
+    storage:
+      documentUpload:
+        bucketName: "{{ .Values.aktusInference.storage.docUpload.bucketName }}"
+      docProcessing:
+        bucketName: "{{ .Values.aktusInference.storage.docProcessing.bucketName }}"
+      extractedData:
+        bucketName: "{{ .Values.aktusInference.storage.extractedData.bucketName }}"
+
+aktus-multimodal-data-ingestion-service:
+  enabled: true
+  aktusMdi:
+    image: us-central1-docker.pkg.dev/aktus-393100/aktus-ai/dev/service-ocr:v0.1.0
+    serviceAccount: "{{ .Values.serviceAccount }}"
+    rabbitmq:
+      host: "rabbitmq"
+    redis:
+      host: "redis"
+    modelInference:
+      host: "aktus-inference:50051"
+    vectorEmbedding:
+      host: "aktus-embedding:8080"
+    storage:
+      models:
+        bucketName: "{{ .Values.aktusInference.storage.models.bucketName }}"
+      docUpload:
+        bucketName: "{{ .Values.aktusInference.storage.docUpload.bucketName }}"
+      docProcessing:
+        bucketName: "{{ .Values.aktusInference.storage.docProcessing.bucketName }}"
+      extractedData:
+        bucketName: "{{ .Values.aktusInference.storage.extractedData.bucketName }}"
+
+aktus-embedding-service:
+  enabled: true
+  serviceAccount:
+    name: "{{ .Values.serviceAccount }}"
+  aktusEmbedding:
+    image: us-central1-docker.pkg.dev/aktus-393100/aktus-ai/dev/service-vector-embedding:v0.1.0
+    serviceAccount: "{{ .Values.serviceAccount }}"
+    mdiService:
+      endpoint: "http://aktus-multimodal-data-ingestion:5315"
+    dbManager:
+      host: "http://aktus-database"
+    storage:
+      extractedData:
+        bucketName: "{{ .Values.aktusInference.storage.extractedData.bucketName }}"
+
+# PostgreSQL configuration
+aktus-postgres-service:
+  enabled: true
+  aktusPostgres:
+    image: postgres:13.16
+    username: "{{ .Values.aktusPostgres.username }}"
+    password: "{{ .Values.aktusPostgres.password }}"
+    database: "{{ .Values.aktusPostgres.database }}"
+    persistence:
+      accessMode: ReadWriteOnce
+      storageClass: ""
+  serviceAccount:
+    name: "{{ .Values.serviceAccount }}"
+
+# Storage configuration
+storage:
+  chroma:
+    size: "{{ .Values.storage.chroma.size }}"
+
+tester:
+  image: us-central1-docker.pkg.dev/aktus-393100/aktus-ai/dev/service-tests:v0.1.0

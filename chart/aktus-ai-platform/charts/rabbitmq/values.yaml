@@ -1,0 +1,13 @@
+# charts/rabbitmq/values.yaml
+rabbitmq:
+  image: rabbitmq:3-management-alpine
+  managementPort: 15672
+  amqpPort: 5672
+  definitions:
+    enabled: true
+    configMap: rabbitmq-definitions
+  persistence:
+    enabled: true
+    size: 8Gi
+    storageClass: ""
+    accessMode: ReadWriteOnce

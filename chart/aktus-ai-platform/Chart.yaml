@@ -1,0 +1,62 @@
+# Chart.yaml
+apiVersion: v2
+name: aktus-platform
+description: Umbrella chart for Aktus AI platform
+appVersion: "1.0.0"
+version: 0.1.0
+type: application
+home: https://aktus.ai
+sources:
+  - https://github.com/aktus-ai/aktus-platform-gcp-marketplace
+
+maintainers:
+  - name: Aktus AI Support
+    email: support@aktus.ai
+
+dependencies:
+
+  # Databases and Message Queues (Level 1)
+  - name: aktus-postgres-service
+    version: "0.1.0"
+    repository: "file://./charts/postgres"
+    tags:
+      - infrastructure
+
+  - name: rabbitmq
+    version: "0.1.0"
+    repository: "file://./charts/rabbitmq"
+    tags:
+      - infrastructure
+
+  - name: redis
+    version: "0.1.0"
+    repository: "file://./charts/redis"
+    tags:
+      - infrastructure
+
+  # Core Services (Level 2)
+  - name: aktus-database-service
+    version: "0.1.0"
+    repository: "file://./charts/aktus-db-manager"
+    condition: aktus-database-service.enabled
+
+  - name: aktus-inference-service
+    version: "0.2.0"
+    repository: "file://./charts/aktus-inference"
+    condition: aktus-inference-service.enabled
+
+  # Application Services (Level 3)
+  - name: aktus-research-service
+    version: "0.1.0"
+    repository: "file://./charts/aktus-research"
+    condition: aktus-research-service.enabled
+
+  - name: aktus-multimodal-data-ingestion-service
+    version: "0.1.0"
+    repository: "file://./charts/aktus-multimodal-data-ingestion"
+    condition: aktus-multimodal-data-ingestion-service.enabled
+
+  - name: aktus-embedding-service
+    version: "0.1.0"
+    repository: "file://./charts/aktus-embedding"
+    condition: aktus-embedding-service.enabled

@@ -1,0 +1,52 @@
+# service-model-inference/values.yaml
+aktusInference:
+  image: us-central1-docker.pkg.dev/aktus-393100/aktus-ai/dev/service-model-inference
+  nodeSelector: 
+    cloud.google.com/gke-accelerator: nvidia-tesla-a100
+  imagePullPolicy: Always
+  platform: linux/amd64
+  grpcPort: 50051
+  serviceAccount: aktus-ai-platform-sa
+  
+  # Model configuration paths
+  modelConfig:
+    minicpm:
+      baseModelPath: "/models/minicpm/production/"
+      peftModelPath: "/models/minicpm/production/"
+      processorPath: "/models/minicpm/production/"
+    yolo:
+      modelPath: "/models/yolo/roboflow_yolo-v1/roboflow_yolo_weights_v1.pt"
+  
+  # Server configuration
+  serverConfig:
+    uri: "[::]:50051"
+    enableFlashAttention: 0
+    hfLocalFilesOnly: 1
+    defaultDevice: "cuda"
+  
+  # Path configuration (mount points)
+  paths:
+    models: "/models"
+    docUpload: "/document_upload"
+    docProcessing: "/doc_processing"
+  
+  # GCS storage configuration
+  storage:
+    models:
+      bucketName: aktus-models
+      readOnly: false
+      mountOptions: "implicit-dirs,file-mode=0666,dir-mode=0777"
+    docUpload:
+      bucketName: "aktus-ai-platform-doc-upload"
+      readOnly: false
+      mountOptions: "implicit-dirs,file-mode=0666,dir-mode=0777"
+    docProcessing:
+      bucketName: "aktus-ai-platform-doc-proc"
+      readOnly: false
+      mountOptions: "implicit-dirs,file-mode=0666,dir-mode=0777"
+  
+  resources:
+    requests:
+      cpu: "20000m"
+      memory: "140Gi"
+      nvidia.com/gpu: 2

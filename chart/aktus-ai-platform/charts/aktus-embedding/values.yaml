@@ -1,0 +1,44 @@
+# aktus-embedding-service/values.yaml
+aktusEmbedding:
+  image: us-central1-docker.pkg.dev/aktus-393100/aktus-ai/dev/service-vector-embedding-worker-timeout-debug
+  imagePullPolicy: Always
+  serviceAccount: aktus-ai-platform-sa
+  port: 8080
+  auth:
+    username: "guest"
+    password: "guest"
+  uvicorn:
+    host: "0.0.0.0"
+    port: "8080"
+    logLevel: "info"
+    timeoutKeepalive: "3600"
+  mdiService:
+    endpoint: "http://aktus-multimodal-data-ingestion:5315"
+  dbManager:
+    host: "http://aktus-database"
+  paths:
+    extractedData: "/extracted_data"
+    docUpload: "/document_upload"
+    docProcessing: "/doc_processing"
+    chromaDb: "/chroma"
+    
+  storage:
+    extractedData:
+      bucketName: aktus-ai-platform
+      readOnly: false
+      mountOptions: "implicit-dirs,file-mode=0666,dir-mode=0777"
+      
+  resources:
+    requests:
+      cpu: "8000m"
+      memory: "16Gi"
+      ephemeral-storage: "5Gi"
+      
+storage:
+  chroma:
+    size: "50Gi"
+    storageClass: "standard"
+    accessMode: "ReadWriteOnce"
+      
+serviceAccount:
+  name: "aktus-ai-platform-sa"

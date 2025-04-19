@@ -1,0 +1,108 @@
+# aktus-gmp-embedding/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: aktus-embedding
+  annotations:
+    gke-gcsfuse/volumes: "true"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: aktus-embedding-service
+  template:
+    metadata:
+      annotations:
+        gke-gcsfuse/volumes: "true"
+      labels:
+        app: aktus-embedding-service
+    spec:
+      terminationGracePeriodSeconds: 60
+      serviceAccountName: aktus-ai-platform-sa
+      containers:
+        - name: aktus-embedding-service
+          image: {{ .Values.aktusEmbedding.image }}
+          imagePullPolicy: {{ .Values.aktusEmbedding.imagePullPolicy }}
+          ports:
+            - containerPort: {{ .Values.aktusEmbedding.port }}
+              name: http
+          env:
+            - name: CHUNKING_CONCURRENCY
+              value: "16"
+            - name: CHUNKING_BATCH_SIZE
+              value: "15"
+            - name: EMBEDDING_BATCH_SIZE
+              value: "15"
+            - name: USERNAME
+              value: "{{ .Values.aktusEmbedding.auth.username }}"
+            - name: PASSWORD
+              value: "{{ .Values.aktusEmbedding.auth.password }}"
+            - name: HOST_ADDRESS
+              value: "{{ .Values.aktusEmbedding.uvicorn.host }}"
+            - name: HOST_PORT
+              value: "{{ .Values.aktusEmbedding.uvicorn.port }}"
+            - name: UVICORN_LOG_LEVEL
+              value: "{{ .Values.aktusEmbedding.uvicorn.logLevel }}"
+            - name: UVICORN_TIMEOUT_KEEPALIVE
+              value: "{{ .Values.aktusEmbedding.uvicorn.timeoutKeepalive }}"
+            - name: OPENAI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: aktus-openai-secret
+                  key: aktus-openai-key
+            - name: SERVICE_OCR_ENDPOINT
+              value: "{{ .Values.aktusEmbedding.mdiService.endpoint }}"
+            - name: EXTRACTED_DATA_DIR
+              value: "{{ .Values.aktusEmbedding.paths.extractedData }}"
+            - name: DOC_UPLOAD_DIR
+              value: "{{ .Values.aktusEmbedding.paths.docUpload }}"
+            - name: DB_MANAGER_HOST
+              value: "{{ .Values.aktusEmbedding.dbManager.host }}"
+            - name: CHROMA_DB_DIR
+              value: "{{ .Values.aktusEmbedding.paths.chromaDb }}"
+          volumeMounts:
+            - name: extracted-data
+              mountPath: {{ .Values.aktusEmbedding.paths.extractedData }}
+            - name: document-upload
+              mountPath: {{ .Values.aktusEmbedding.paths.docUpload }}
+            - name: doc-processing
+              mountPath: {{ .Values.aktusEmbedding.paths.docProcessing }}
+            - name: chroma-db
+              mountPath: {{ .Values.aktusEmbedding.paths.chromaDb }}
+            - name: nomic-dir
+              mountPath: /root/.nomic
+            - name: ephemeral
+              mountPath: "/tmp"
+          resources:
+            {{- toYaml .Values.aktusEmbedding.resources | nindent 12 }}
+
+      volumes:
+        - name: extracted-data
+          csi:
+            driver: gcsfuse.csi.storage.gke.io
+            readOnly: false
+            volumeAttributes:
+              bucketName: "aktus-ai-platform-ext-data"
+              mountOptions: "implicit-dirs"
+        - name: document-upload
+          csi:
+            driver: gcsfuse.csi.storage.gke.io
+            readOnly: false
+            volumeAttributes:
+              bucketName: "aktus-ai-platform-doc-upload"
+              mountOptions: "implicit-dirs"
+        - name: doc-processing
+          csi:
+            driver: gcsfuse.csi.storage.gke.io
+            readOnly: false
+            volumeAttributes:
+              bucketName: "aktus-ai-platform-doc-proc"
+              mountOptions: "implicit-dirs"
+        - name: chroma-db
+          persistentVolumeClaim:
+            claimName: chroma-pvc
+        - name: nomic-dir
+          emptyDir: {}
+        - name: ephemeral
+          emptyDir:
+            sizeLimit: 5Gi
