@@ -3,13 +3,13 @@
 x-google-marketplace:
   schemaVersion: v2
   applicationApiVersion: v1beta1
-  publishedVersion: "0.1.0"
+  publishedVersion: "1.0.0"
   publishedVersionMetadata:
     releaseNote: >-
       Initial release of Aktus AI Platform.
   clusterConstraints:
     resources:
-      - replicas: 1-4
+      - replicas: 1-2
         requests:
           cpu: 10000m
           memory: 72Gi
@@ -66,21 +66,11 @@ x-google-marketplace:
         description: Base price per node per month
         priceInUsd: 200
       additionalItems:
-        - name: API Requests
-          description: Price per 1000 API requests
-          priceInUsd: 0.50
-          unitOfMeasure: 1000 requests
-          metricName: aktus_api_requests
         - name: Inference Compute
           description: Price per hour of inference computation
           priceInUsd: 5.00
           unitOfMeasure: hour
           metricName: aktus_inference_time_seconds
-        - name: Storage
-          description: Price per GB of storage
-          priceInUsd: 0.10
-          unitOfMeasure: GB
-          metricName: aktus_storage_bytes
 
 properties:
   name:
@@ -222,6 +212,21 @@ properties:
     description: Enable tracking and reporting of usage metrics
     default: true
 
+  # API keys for external services
+  secrets.openaiApiKey:
+    type: string
+    title: OpenAI API Key
+    description: API key for OpenAI services
+    x-google-marketplace:
+      type: MASKED_FIELD
+      
+  secrets.huggingfaceLoginKey:
+    type: string
+    title: Hugging Face Login Key
+    description: Login key for accessing Hugging Face models
+    x-google-marketplace:
+      type: MASKED_FIELD
+
 required:
   - name
   - namespace
@@ -229,3 +234,19 @@ required:
   - aktusPostgres.username
   - aktusPostgres.password
   - aktusPostgres.database
+  - aktusPostgres.persistence.size
+  - storage.chroma.size
+  - rabbitmq.enabled
+  - redis.enabled
+  - aktus-inference-service.enabled
+  - aktus-multimodal-data-ingestion-service.enabled
+  - aktus-embedding-service.enabled
+  - aktus-database-service.enabled
+  - aktus-research-service.enabled
+  - aktusInference.storage.models.bucketName
+  - aktusInference.storage.docUpload.bucketName
+  - aktusInference.storage.docProcessing.bucketName
+  - aktusInference.storage.extractedData.bucketName
+  - billing.enabled
+  - secrets.openaiApiKey
+  - secrets.huggingfaceLoginKey
