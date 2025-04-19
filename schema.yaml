@@ -1,0 +1,231 @@
+# root/schema.yaml
+
+x-google-marketplace:
+  schemaVersion: v2
+  applicationApiVersion: v1beta1
+  publishedVersion: "0.1.0"
+  publishedVersionMetadata:
+    releaseNote: >-
+      Initial release of Aktus AI Platform.
+  clusterConstraints:
+    resources:
+      - replicas: 1-4
+        requests:
+          cpu: 10000m
+          memory: 72Gi
+        affinity:
+          simpleNodeAffinity:
+            type: REQUIRE
+            matchExpressions:
+              - key: cloud.google.com/gke-accelerator
+                operator: In
+                values:
+                  - nvidia-tesla-a100
+
+  # Service account configuration
+  managedUpdates:
+    kalmSupported: false
+  images:
+    inference:
+      properties:
+        aktus-inference-service.aktusInference.image:
+          type: FULL
+    mdi:
+      properties:
+        aktus-multimodal-data-ingestion-service.aktusMdi.image:
+          type: FULL
+    research:
+      properties:
+        aktus-research-service.aktusResearch.image:
+          type: FULL
+    database:
+      properties:
+        aktus-database-service.aktusDatabase.image:
+          type: FULL
+    embedding:
+      properties:
+        aktus-embedding-service.aktusEmbedding.image:
+          type: FULL
+    postgres:
+      properties:
+        aktus-postgres-service.aktusPostgres.image:
+          type: FULL
+    rabbitmq:
+      properties:
+        rabbitmq.rabbitmq.image:
+          type: FULL
+    redis:
+      properties:
+        redis.redis.image:
+          type: FULL
+  billable:
+    enabled: true
+    costStructure:
+      basePrice:
+        name: Per Node
+        description: Base price per node per month
+        priceInUsd: 200
+      additionalItems:
+        - name: API Requests
+          description: Price per 1000 API requests
+          priceInUsd: 0.50
+          unitOfMeasure: 1000 requests
+          metricName: aktus_api_requests
+        - name: Inference Compute
+          description: Price per hour of inference computation
+          priceInUsd: 5.00
+          unitOfMeasure: hour
+          metricName: aktus_inference_time_seconds
+        - name: Storage
+          description: Price per GB of storage
+          priceInUsd: 0.10
+          unitOfMeasure: GB
+          metricName: aktus_storage_bytes
+
+properties:
+  name:
+    type: string
+    x-google-marketplace:
+      type: NAME
+  namespace:
+    type: string
+    x-google-marketplace:
+      type: NAMESPACE
+  serviceAccount:
+    type: string
+    title: Service Account
+    x-google-marketplace:
+      type: SERVICE_ACCOUNT
+      serviceAccount:
+        description: >
+          GCP service account for the application. Needs permissions to manage secrets, configmaps, PVCs (Role provided) and broader cluster edit permissions (ClusterRole 'edit' provided) for managing application components.
+        roles:
+          - type: ClusterRole
+            rulesType: PREDEFINED
+            rulesFromRoleName: view
+          - type: Role
+            rulesType: CUSTOM
+            rules:
+              - apiGroups: [""]
+                resources: ["secrets", "configmaps", "persistentvolumeclaims"]
+                verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+  
+  # Database configurations
+  aktusPostgres.username:
+    type: string
+    title: PostgreSQL Username
+    description: Username for PostgreSQL database
+    default: root
+  
+  aktusPostgres.password:
+    type: string
+    title: PostgreSQL Password
+    description: Password for PostgreSQL database
+    x-google-marketplace:
+      type: GENERATED_PASSWORD
+      generatedPassword:
+        length: 16
+        includeSymbols: false
+        base64: false
+  
+  aktusPostgres.database:
+    type: string
+    title: PostgreSQL Database
+    description: Name of the PostgreSQL database
+    default: root
+  
+  # Storage configurations
+  aktusPostgres.persistence.size:
+    type: string
+    title: PostgreSQL Storage Size
+    description: Size of the PostgreSQL persistent volume
+    default: 500Gi
+  
+  storage.chroma.size:
+    type: string
+    title: Vector Database Storage Size
+    description: Size of the persistent volume for the vector database
+    default: 500Gi
+
+  # Infrastructure enabling flags
+  rabbitmq.enabled:
+    type: boolean
+    title: Enable RabbitMQ
+    description: Enable RabbitMQ message broker
+    default: true
+  
+  redis.enabled:
+    type: boolean
+    title: Enable Redis
+    description: Enable Redis cache
+    default: true
+  
+  # Service configurations
+  aktus-inference-service.enabled:
+    type: boolean
+    title: Enable Inference Service
+    description: Enable the model inference service
+    default: true
+  
+  aktus-multimodal-data-ingestion-service.enabled:
+    type: boolean
+    title: Enable Multimodal Data Ingestion
+    description: Enable the multimodal data ingestion service
+    default: true
+  
+  aktus-embedding-service.enabled:
+    type: boolean
+    title: Enable Embedding Service
+    description: Enable the vector embedding service
+    default: true
+  
+  aktus-database-service.enabled:
+    type: boolean
+    title: Enable Database Service
+    description: Enable the database manager service
+    default: true
+  
+  aktus-research-service.enabled:
+    type: boolean
+    title: Enable Research Service
+    description: Enable the research service
+    default: true
+
+  # GCS storage bucket configurations
+  aktusInference.storage.models.bucketName:
+    type: string
+    title: Models Storage Bucket
+    description: GCS bucket name for storing ML models
+    default: aktus-models
+  
+  aktusInference.storage.docUpload.bucketName:
+    type: string
+    title: Document Upload Bucket
+    description: GCS bucket name for document uploads
+    default: aktus-ai-platform-doc-upload
+  
+  aktusInference.storage.docProcessing.bucketName:
+    type: string
+    title: Document Processing Bucket
+    description: GCS bucket name for document processing
+    default: aktus-ai-platform-doc-proc
+    
+  aktusInference.storage.extractedData.bucketName:
+    type: string
+    title: Extracted Data Bucket
+    description: GCS bucket name for extracted document data
+    default: aktus-ai-platform-ext-data
+
+  billing.enabled:
+    type: boolean
+    title: Enable Usage-Based Billing
+    description: Enable tracking and reporting of usage metrics
+    default: true
+
+required:
+  - name
+  - namespace
+  - serviceAccount
+  - aktusPostgres.username
+  - aktusPostgres.password
+  - aktusPostgres.database

@@ -1,0 +1,57 @@
+# charts/aktus-ai-platform/templates/ubbagent-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-ubbagent
+  labels:
+    app.kubernetes.io/name: {{ .Release.Name }}
+    app.kubernetes.io/component: ubbagent
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ .Release.Name }}
+      app.kubernetes.io/component: ubbagent
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ .Release.Name }}
+        app.kubernetes.io/component: ubbagent
+    spec:
+      containers:
+      - name: ubbagent
+        image: gcr.io/cloud-marketplace-tools/metering/ubbagent:latest
+        imagePullPolicy: Always
+        env:
+        - name: AGENT_CONFIG_FILE
+          value: /etc/ubbagent/config.yaml
+        - name: AGENT_STATE_DIR
+          value: /var/lib/ubbagent
+        - name: AGENT_REPORT_DIR
+          value: /var/lib/ubbagent/reports
+        - name: consumer_id
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Release.Name }}-ubbagent-secret
+              key: consumer-id
+        - name: reporting_key
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Release.Name }}-ubbagent-secret
+              key: reporting-key
+        - name: service_name
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Release.Name }}-ubbagent-secret
+              key: service-name
+        volumeMounts:
+        - name: ubbagent-config
+          mountPath: /etc/ubbagent
+        - name: ubbagent-state
+          mountPath: /var/lib/ubbagent
+      volumes:
+      - name: ubbagent-config
+        configMap:
+          name: {{ .Release.Name }}-ubbagent-config
+      - name: ubbagent-state
+        emptyDir: {}

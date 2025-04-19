@@ -1,0 +1,100 @@
+# root/chart/aktus-ai-platform/apptest/schema.yaml
+
+# Add top-level block to explicitly set version for testing
+x-google-marketplace:
+  # Match the main schema version
+  publishedVersion: "0.1.0"
+
+properties:
+  name:
+    type: string
+    x-google-marketplace:
+      type: NAME
+  namespace:
+    type: string
+    x-google-marketplace:
+      type: NAMESPACE
+  serviceAccount:
+    type: string
+    title: Service Account
+    x-google-marketplace:
+      type: SERVICE_ACCOUNT
+      serviceAccount:
+        description: >
+          GCP service account for the application. Needs permissions to manage secrets, configmaps, PVCs (Role provided).
+        roles:
+          - type: ClusterRole
+            rulesType: PREDEFINED
+            rulesFromRoleName: view
+          - type: Role
+            rulesType: CUSTOM
+            rules:
+              - apiGroups: [""]
+                resources: ["secrets", "configmaps", "persistentvolumeclaims"]
+                verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+  
+  # Core database credentials for testing - minimal set for verification
+  aktusPostgres.username:
+    type: string
+    title: PostgreSQL Username
+    description: Username for PostgreSQL database
+    default: root
+  
+  aktusPostgres.password:
+    type: string
+    title: PostgreSQL Password
+    description: Password for PostgreSQL database
+    default: test-password
+    x-google-marketplace:
+      type: GENERATED_PASSWORD
+      generatedPassword:
+        length: 16
+        includeSymbols: false
+        base64: false
+
+  # Minimal services for testing
+  rabbitmq.enabled:
+    type: boolean
+    title: Enable RabbitMQ
+    description: Enable RabbitMQ message broker
+    default: true
+  
+  redis.enabled:
+    type: boolean
+    title: Enable Redis
+    description: Enable Redis cache
+    default: true
+  
+  # Only enable minimal services for verification
+  aktus-database-service.enabled:
+    type: boolean
+    title: Enable Database Service
+    description: Enable the database manager service
+    default: true
+    
+  aktus-inference-service.enabled:
+    type: boolean
+    title: Enable Inference Service 
+    default: false
+    
+  aktus-multimodal-data-ingestion-service.enabled:
+    type: boolean
+    title: Enable Multimodal Data Ingestion
+    default: false
+    
+  aktus-embedding-service.enabled:
+    type: boolean
+    title: Enable Embedding Service
+    default: false
+    
+  aktus-research-service.enabled:
+    type: boolean
+    title: Enable Research Service
+    default: false
+
+required:
+  - name
+  - namespace
+  - serviceAccount
+  - aktusPostgres.username
+  - aktusPostgres.password
