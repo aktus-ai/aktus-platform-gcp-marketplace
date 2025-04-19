@@ -1,0 +1,167 @@
+{{- if .Values.billing.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-billing-helper
+  labels:
+    app.kubernetes.io/name: {{ .Release.Name }}
+data:
+  billing_metrics.py: |
+    #!/usr/bin/env python3
+    """
+    Helper module for reporting billing metrics to the ubbagent in GCP Marketplace deployments.
+    
+    Example usage:
+    
+    from billing_metrics import report_inference_time, report_api_request, report_storage_usage
+    
+    # Report inference time
+    report_inference_time(elapsed_seconds=120.5)  # 2 minutes of inference
+    
+    # Report API requests
+    report_api_request(count=1)  # Single API request
+    
+    # Report storage usage
+    report_storage_usage(bytes_used=1073741824)  # 1GB of storage
+    """
+    
+    import os
+    import time
+    import json
+    import logging
+    import requests
+    from datetime import datetime, timezone
+
+    # Configure logging
+    logging.basicConfig(level=logging.INFO)
+    logger = logging.getLogger("billing_metrics")
+
+    # Get the namespace from the environment
+    NAMESPACE = os.environ.get("KUBERNETES_NAMESPACE", "default")
+    
+    # Determine the billing service name based on the release name (from env var)
+    RELEASE_NAME = os.environ.get("RELEASE_NAME", "aktus-platform")
+    BILLING_SERVICE = f"{RELEASE_NAME}-billing.{NAMESPACE}"
+    
+    # Billing agent endpoint
+    BILLING_ENDPOINT = f"http://{BILLING_SERVICE}:8090/report"
+    
+    def report_metric(metric_name, value, value_type="double"):
+        """
+        Report a metric to the ubbagent.
+        
+        Args:
+            metric_name (str): The name of the metric to report.
+            value: The value to report.
+            value_type (str): The type of the value ('double', 'int', 'string', etc.)
+        
+        Returns:
+            bool: True if the metric was reported successfully, False otherwise.
+        """
+        now = datetime.now(timezone.utc).isoformat()
+        
+        payload = {
+            "name": metric_name,
+            "startTime": now,
+            "endTime": now,
+            "value": {value_type: value}
+        }
+        
+        try:
+            response = requests.post(BILLING_ENDPOINT, json=payload, timeout=5)
+            if response.status_code == 200:
+                logger.info(f"Successfully reported metric: {metric_name}={value}")
+                return True
+            else:
+                logger.warning(f"Failed to report metric {metric_name}: HTTP {response.status_code}")
+                return False
+        except Exception as e:
+            logger.error(f"Error reporting metric {metric_name}: {str(e)}")
+            return False
+    
+    def report_inference_time(elapsed_seconds):
+        """
+        Report the time spent on inference.
+        
+        Args:
+            elapsed_seconds (float): The number of seconds spent on inference.
+            
+        Returns:
+            bool: True if the metric was reported successfully, False otherwise.
+        """
+        return report_metric("aktus_inference_time_seconds", elapsed_seconds, "double")
+    
+    def report_api_request(count=1):
+        """
+        Report API requests.
+        
+        Args:
+            count (int): The number of API requests to report.
+            
+        Returns:
+            bool: True if the metric was reported successfully, False otherwise.
+        """
+        return report_metric("aktus_api_requests", count, "int")
+    
+    def report_storage_usage(bytes_used):
+        """
+        Report storage usage in bytes.
+        
+        Args:
+            bytes_used (int): The number of bytes used for storage.
+            
+        Returns:
+            bool: True if the metric was reported successfully, False otherwise.
+        """
+        return report_metric("aktus_storage_bytes", bytes_used, "int")
+
+  billing_metrics.sh: |
+    #!/bin/bash
+    # Bash helper for reporting metrics to ubbagent
+    
+    # Get Kubernetes namespace
+    NAMESPACE=${KUBERNETES_NAMESPACE:-default}
+    
+    # Get release name
+    RELEASE_NAME=${RELEASE_NAME:-aktus-platform}
+    
+    # Billing service endpoint
+    BILLING_ENDPOINT="http://${RELEASE_NAME}-billing.${NAMESPACE}:8090/report"
+    
+    # Function to report a metric
+    report_metric() {
+      local metric_name=$1
+      local value=$2
+      local value_type=$3
+      
+      # Get current time in ISO 8601 format
+      local now=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+      
+      # Create JSON payload
+      local payload="{\"name\":\"${metric_name}\",\"startTime\":\"${now}\",\"endTime\":\"${now}\",\"value\":{\"${value_type}\":${value}}}"
+      
+      # Send request to billing agent
+      curl -s -X POST -H "Content-Type: application/json" -d "${payload}" "${BILLING_ENDPOINT}"
+      return $?
+    }
+    
+    # Helper functions for specific metrics
+    
+    # Report inference time in seconds
+    report_inference_time() {
+      local elapsed_seconds=$1
+      report_metric "aktus_inference_time_seconds" "${elapsed_seconds}" "double"
+    }
+    
+    # Report API requests
+    report_api_request() {
+      local count=${1:-1}
+      report_metric "aktus_api_requests" "${count}" "int"
+    }
+    
+    # Report storage usage in bytes
+    report_storage_usage() {
+      local bytes_used=$1
+      report_metric "aktus_storage_bytes" "${bytes_used}" "int"
+    }
+{{- end }} 

@@ -1,4 +1,5 @@
 # charts/aktus-ai-platform/templates/ubbagent-deployment.yaml
+{{- if .Values.billing.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -55,3 +56,4 @@ spec:
           name: {{ .Release.Name }}-ubbagent-config
       - name: ubbagent-state
         emptyDir: {}
+{{- end }}
