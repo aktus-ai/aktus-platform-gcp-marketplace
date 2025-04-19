@@ -3,12 +3,12 @@
 
 set -e
 
-PROJECT_ID="aktus-393100"
-VERSION="0.1.0"
-TRACK="0.1"
+PROJECT_ID="aktus-ai-platform-public"
+VERSION="1.0.0"
+TRACK="1.0"
 APP_NAME="aktus-platform"
 
-IMAGE_NAME="us-central1-docker.pkg.dev/${PROJECT_ID}/google-marketplace/${APP_NAME}/deployer"
+IMAGE_NAME="us-docker.pkg.dev/${PROJECT_ID}/aktus-platform-marketplace/deployer"
 
 if [ ! -d "chart/aktus-ai-platform" ]; then
   echo "Error: This script must be run from the root of your repository"
@@ -34,26 +34,26 @@ if [ ! -f "schema.yaml" ]; then
   exit 1
 fi
 
-echo "Building multi-arch deployer image locally: ${IMAGE_NAME}:${TRACK}"
+echo "Building multi-arch deployer image locally: ${IMAGE_NAME}:${VERSION}"
 docker buildx build \
   -f ./Dockerfile \
   --platform linux/amd64,linux/arm64 \
   --no-cache \
-  --build-arg REGISTRY=us-central1-docker.pkg.dev/${PROJECT_ID}/google-marketplace/${APP_NAME} \
+  --build-arg REGISTRY=us-docker.pkg.dev/${PROJECT_ID}/aktus-platform-marketplace/${APP_NAME} \
   --build-arg TAG=${VERSION} \
+  --tag ${IMAGE_NAME}:${VERSION} \
   --tag ${IMAGE_NAME}:${TRACK} \
-  --tag ${IMAGE_NAME}:latest \
   --load .
 
-gcloud auth configure-docker us-central1-docker.pkg.dev
-echo "Pushing multi-arch image: ${IMAGE_NAME}:${TRACK} and :latest"
+gcloud auth configure-docker us-docker.pkg.dev
+echo "Pushing multi-arch image: ${IMAGE_NAME}:${VERSION} and :${TRACK}"
+docker push ${IMAGE_NAME}:${VERSION}
 docker push ${IMAGE_NAME}:${TRACK}
-docker push ${IMAGE_NAME}:latest
 
-echo "Successfully built and pushed multi-arch deployer image: ${IMAGE_NAME}:${TRACK}"
+echo "Successfully built and pushed multi-arch deployer image: ${IMAGE_NAME}:${VERSION}"
 echo ""
 echo "To verify your application, run:"
-echo "mpdev /scripts/verify --deployer=${IMAGE_NAME}:${TRACK}"
+echo "mpdev /scripts/verify --deployer=${IMAGE_NAME}:${VERSION}"
 echo ""
 echo "To submit this version for review, use Partner Portal and specify:"
-echo "Deployer Image: ${IMAGE_NAME}:${TRACK}"
+echo "Deployer Image: ${IMAGE_NAME}:${VERSION}"
