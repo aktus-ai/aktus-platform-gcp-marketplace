@@ -7,7 +7,7 @@ metadata:
     app.kubernetes.io/name: "{{ .Release.Name }}"
   annotations:
     kubernetes-engine.cloud.google.com/icon: data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMgAAADICAYAAACtWK6eAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAWMSURBVHgB7d1NbttIEAXQNmPvvVL2vkGYG1jZZxUgBxg7J4hwAzs3CHOCZJcDTOxVgBzByRECZJlVUO/CSM2K/JFVn/p7ABwNHFuMSLc+i4+oEgAAAAAAAAAAAAAAAAAAAAAAAAAAAMhTL0Tlak9T6e+lEoO8bX8sl6dWrvaqlQ7Z66XlWLzrpl5WL/fTzSPMRYAJKoGYp+UEItvDkG3dpRxN6CejpVbPUn+dGY+nST2UjERY3GR4HvRYIJTIE4AZVBdGrS9jrS9n4SrL1Eu9o/YY5XhYauXDcrkSHHaJuEUvL+Q5Vv0FeKXlcvXn2X4Zaz3O4zJWvauXl3JMlhj1/dThPFfRn0n1pSQ91M+FVgzKPTtcr9zp3x4rRrWHAZaL1aMsWamUKuN7tNNOjp+1flc+ngyBvK3+4FcXVnvn1ssHOSAXe9j3SvFUylCeIdl8BzXuZWW2RZ3nRdnZ5FXreXJ/F9YLLpfHZazv67PtbfVmueyrMnQq9UZzF9ZLPr/Sva3WGHmr/0dKuboP87oP21+37b7lZ3J53J4jP++lTAYEAECOKtPo1S/dVp6eZR7D8liOl+sFl1Zma1tYazG/t44WjWXLqgcAAAAAAAAAAAAAFOLI+0HKK1f9tOy2O5OdOcg6s+kbnV3Y+1BO7hHI2Zfhk+Rl+2LNBrLYU7nXvUyrMiyPVR7I6Wcrzx9LZjvXsD0ek1wNH5vd1+1t+91+k4f7c/u46m33OFUVDZfNjLr5P3Z7+w9fb//hsrV1rD+/4X5ub/O2XT4xvGt7vdDtvWz0d7u2m9nXS72j/n7v6qXe/rau9l43ebtvuyMfznNpQdC4vWwqj5Pjcrlcc5v+eo/L4gvVHuuwztU2Ns9nV8p1eqp2d3CZrW24v6pjeRuqZ/kpw+10X8sRxdFUbaNjNxwN3/42GWfcNvu0MXzB7jZbvzDFcRvJZfO2m+vGbR3o+dZ0Pjt5rKvPqKo79rF32Zg+3+Pykej91jlUzXv1Vb6LjnWiHJP31Ry+u9t29Xzt37GwPqFV/UDtba6PK8cRPodpzf39JlvL37a3m7zN8+oXb8uusrXt3t79m7y08uzY3R+c7cOQTYs7bvvbZ1O9/aZ7eFdvW43FjWVnW50D1fTc5HF7WK79C7OxsH5Riq1tVvtc3XYuZP9idXt8huwZxPPNQvx9PZ4PZZD7aeeyI5GXrZQvr07lWJ/k1aDcVK+qj/Nyso31ifzUvjnXY4M8ZmdE3d+/Qc5ky/qifDpY1rXpZdn6b7WPnU1eXJ3ej/LdvpCju73L8jCfLnuz9S74J1lnrG7btbxv+ZNsz1Mzko2tF9aftffPFgEBEU0AAEBp4s5iXZrleS2xvG4mXLZDY3nTXCzbMnxZz2zYVoV9FqtU9VD3U0c4zfJZHstjeTDcfyBKVxqz7UJWpixnQOrPu3CsRqn6qZPOYu0ZLkvHbLpwLdnmzvsKw8Nkd/OWm+dJxZ7FqoflsTyWD9lyvtuxzvtKWx8sO9dJ7Ov7s/XDsC7V9pnlX8rj1YXZftXPQwflAQDgGFXu7j23ek9PLWfnqtUP10PcM/p9nQbJTCc3+Ksbl9V5oGFU2aq7u+19j7fXdavs0SX3uyRV5OWfk0GC0Jzdw6uXpj4/VeXWV+S7bcP6I5rH3Kzr9vpIlDvIzlvJTnCxrB3zG9+8PeStj+m6oQ0aNqsyytS/5O/GvkEeY+LMGgAAZCnCLNY4q2V5xc1ileJ/ZLEi/FU+nXa5LG9mFitCUJ/l0pOHXdSUf0YGy/Jmm8UCAACIRgYLAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACLwD2yoF3FmloT+AAAAAElFTkSuQmCC
-    marketplace.cloud.google.com/deploy-info: '{partner_id: "aktus-ai", product_id: "aktus-platform", partner_name: "Aktus AI"}'
+    marketplace.cloud.google.com/deploy-info: '{"partner_id": "YL8mwhgO2T", "product_id": "aktus-ai-platform", "partner_name": "Aktus AI"}'
 spec:
   descriptor:
     type: Aktus AI Platform
@@ -121,3 +121,38 @@ spec:
       serviceRef:
         name: aktus-postgres
         port: 5432
+  - name: Embedding Service
+    type: Reference
+    valueFrom:
+      type: ServiceRef
+      serviceRef:
+        name: aktus-embedding
+        port: 80
+  - name: Chroma Vector Database
+    type: Reference
+    valueFrom:
+      type: ServiceRef
+      serviceRef:
+        name: aktus-chroma
+        port: 80
+  - name: Redis
+    type: Reference
+    valueFrom:
+      type: ServiceRef
+      serviceRef:
+        name: aktus-redis
+        port: 6379
+  - name: RabbitMQ
+    type: Reference
+    valueFrom:
+      type: ServiceRef
+      serviceRef:
+        name: aktus-rabbitmq
+        port: 5672
+  - name: Multimodal Data Ingestion Service
+    type: Reference
+    valueFrom:
+      type: ServiceRef
+      serviceRef:
+        name: aktus-multimodal-data-ingestion
+        port: 80

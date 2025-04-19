@@ -112,7 +112,7 @@ spec:
               mountPath: {{ .Values.aktusMdi.paths.docUpload }}
           resources:
             {{- toYaml .Values.aktusMdi.resources | nindent 12 }}
-      serviceAccountName: {{ .Values.aktusMdi.serviceAccount | default "aktus-ai-platform-sa" }}
+      serviceAccountName: aktus-ai-platform-sa
       volumes:
         - name: models-data
           csi:

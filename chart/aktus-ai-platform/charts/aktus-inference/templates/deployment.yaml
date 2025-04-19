@@ -24,10 +24,10 @@ spec:
       terminationGracePeriodSeconds: 60
       containers:
         - name: aktus-inference-service
-          image: {{ .Values.aktusInference.image }}
-          imagePullPolicy: {{ .Values.aktusInference.imagePullPolicy }}
+          image: "{{ .Values.aktusInference.image }}"
+          imagePullPolicy: "Always"
           ports:
-            - containerPort: {{ .Values.aktusInference.grpcPort }}
+            - containerPort: 50051
               name: grpc
           env:
             - name: HF_LOGIN_KEY
@@ -57,35 +57,59 @@ spec:
               value: "all"
             - name: CUDA_VISIBLE_DEVICES
               value: "0,1"
+            - name: SERVICE_PORT
+              value: "{{ .Values.aktusInference.grpcPort }}"
+            {{- if $.Values.global.billing.enabled }}
+            - name: KUBERNETES_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: RELEASE_NAME
+              value: {{ $.Release.Name | quote }}
+            {{- end }}
           volumeMounts:
             - name: models-data
-              mountPath: {{ .Values.aktusInference.paths.models }}
+              mountPath: "{{ .Values.aktusInference.paths.models }}"
             - name: document-upload
-              mountPath: {{ .Values.aktusInference.paths.docUpload }}
+              mountPath: "{{ .Values.aktusInference.paths.docUpload }}"
             - name: doc-processing
-              mountPath: {{ .Values.aktusInference.paths.docProcessing }}
+              mountPath: "{{ .Values.aktusInference.paths.docProcessing }}"
+            {{- if $.Values.global.billing.enabled }}
+            - name: billing-helper
+              mountPath: /usr/local/lib/python3.8/site-packages/billing_metrics.py
+              subPath: billing_metrics.py
+            {{- end }}
           resources:
-            {{- toYaml .Values.aktusInference.resources | nindent 12 }}
-      serviceAccountName: {{ .Values.aktusInference.serviceAccount | default "aktus-ai-platform-sa" }}
+            limits:
+              nvidia.com/gpu: 1
+            requests:
+              nvidia.com/gpu: 1
+      serviceAccountName: aktus-ai-platform-sa
       volumes:
         - name: models-data
           csi:
             driver: gcsfuse.csi.storage.gke.io
-            readOnly: {{ .Values.aktusInference.storage.models.readOnly }}
+            readOnly: false
             volumeAttributes:
-              bucketName: {{ .Values.aktusInference.storage.models.bucketName }}
+              bucketName: "{{ .Values.aktusInference.storage.models.bucketName }}"
               mountOptions: "{{ .Values.aktusInference.storage.models.mountOptions }}"
         - name: document-upload
           csi:
             driver: gcsfuse.csi.storage.gke.io
-            readOnly: {{ .Values.aktusInference.storage.docUpload.readOnly }}
+            readOnly: false
             volumeAttributes:
-              bucketName: {{ .Values.aktusInference.storage.docUpload.bucketName }}
+              bucketName: "{{ .Values.aktusInference.storage.docUpload.bucketName }}"
               mountOptions: "{{ .Values.aktusInference.storage.docUpload.mountOptions }}"
         - name: doc-processing
           csi:
             driver: gcsfuse.csi.storage.gke.io
-            readOnly: {{ .Values.aktusInference.storage.docProcessing.readOnly }}
+            readOnly: false
             volumeAttributes:
-              bucketName: {{ .Values.aktusInference.storage.docProcessing.bucketName }}
+              bucketName: "{{ .Values.aktusInference.storage.docProcessing.bucketName }}"
               mountOptions: "{{ .Values.aktusInference.storage.docProcessing.mountOptions }}"
+        {{- if $.Values.global.billing.enabled }}
+        - name: billing-helper
+          configMap:
+            name: {{ $.Release.Name }}-billing-helper
+            defaultMode: 0755
+        {{- end }}

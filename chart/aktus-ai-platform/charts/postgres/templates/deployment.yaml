@@ -15,7 +15,7 @@ spec:
       labels:
         app: aktus-postgres-service
     spec:
-      serviceAccountName: {{ .Values.serviceAccount }}
+      serviceAccountName: aktus-ai-platform-sa
       securityContext:
         fsGroup: 999
       containers:

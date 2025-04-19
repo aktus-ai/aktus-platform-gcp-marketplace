@@ -21,10 +21,10 @@ spec:
       serviceAccountName: aktus-ai-platform-sa
       containers:
         - name: aktus-embedding-service
-          image: {{ .Values.aktusEmbedding.image }}
-          imagePullPolicy: {{ .Values.aktusEmbedding.imagePullPolicy }}
+          image: "{{ .Values.aktusEmbedding.image }}"
+          imagePullPolicy: Always
           ports:
-            - containerPort: {{ .Values.aktusEmbedding.port }}
+            - containerPort: 8080
               name: http
           env:
             - name: CHUNKING_CONCURRENCY
@@ -62,19 +62,22 @@ spec:
               value: "{{ .Values.aktusEmbedding.paths.chromaDb }}"
           volumeMounts:
             - name: extracted-data
-              mountPath: {{ .Values.aktusEmbedding.paths.extractedData }}
+              mountPath: "{{ .Values.aktusEmbedding.paths.extractedData }}"
             - name: document-upload
-              mountPath: {{ .Values.aktusEmbedding.paths.docUpload }}
+              mountPath: "{{ .Values.aktusEmbedding.paths.docUpload }}"
             - name: doc-processing
-              mountPath: {{ .Values.aktusEmbedding.paths.docProcessing }}
+              mountPath: "{{ .Values.aktusEmbedding.paths.docProcessing }}"
             - name: chroma-db
-              mountPath: {{ .Values.aktusEmbedding.paths.chromaDb }}
+              mountPath: "{{ .Values.aktusEmbedding.paths.chromaDb }}"
             - name: nomic-dir
               mountPath: /root/.nomic
             - name: ephemeral
               mountPath: "/tmp"
           resources:
-            {{- toYaml .Values.aktusEmbedding.resources | nindent 12 }}
+            requests:
+              cpu: "4000m"
+              memory: "8Gi"
+              ephemeral-storage: "5Gi"
 
       volumes:
         - name: extracted-data
@@ -82,21 +85,21 @@ spec:
             driver: gcsfuse.csi.storage.gke.io
             readOnly: false
             volumeAttributes:
-              bucketName: "aktus-ai-platform-ext-data"
+              bucketName: "{{ .Values.aktusEmbedding.storage.extractedData.bucketName }}"
               mountOptions: "implicit-dirs"
         - name: document-upload
           csi:
             driver: gcsfuse.csi.storage.gke.io
             readOnly: false
             volumeAttributes:
-              bucketName: "aktus-ai-platform-doc-upload"
+              bucketName: "{{ .Values.aktusEmbedding.storage.docUpload.bucketName }}"
               mountOptions: "implicit-dirs"
         - name: doc-processing
           csi:
             driver: gcsfuse.csi.storage.gke.io
             readOnly: false
             volumeAttributes:
-              bucketName: "aktus-ai-platform-doc-proc"
+              bucketName: "{{ .Values.aktusEmbedding.storage.docProcessing.bucketName }}"
               mountOptions: "implicit-dirs"
         - name: chroma-db
           persistentVolumeClaim:

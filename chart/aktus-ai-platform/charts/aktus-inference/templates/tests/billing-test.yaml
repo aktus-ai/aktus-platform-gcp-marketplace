@@ -1,0 +1,82 @@
+{{- if .Values.global.billing.enabled }}
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ .Release.Name }}-billing-test"
+  annotations:
+    "helm.sh/hook": test
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+  labels:
+    app.kubernetes.io/name: aktus-inference-service
+    app.kubernetes.io/instance: {{ .Release.Name }}
+spec:
+  containers:
+    - name: billing-test
+      image: python:3.8-slim
+      command:
+        - python3
+        - -c
+        - |
+          import os
+          import json
+          import time
+          import requests
+          from datetime import datetime, timezone
+
+          # Test metrics
+          NAMESPACE = os.environ.get("KUBERNETES_NAMESPACE")
+          RELEASE_NAME = os.environ.get("RELEASE_NAME")
+          BILLING_ENDPOINT = f"http://{RELEASE_NAME}-billing.{NAMESPACE}:8090/report"
+          
+          # Test metrics - only inference time since we simplified billing
+          metrics = [
+            {
+              "name": "aktus_inference_time_seconds",
+              "value": {"double": 60.0}  # 1 minute
+            }
+          ]
+          
+          # Add timestamps
+          now = datetime.now(timezone.utc).isoformat()
+          for metric in metrics:
+            metric["startTime"] = now
+            metric["endTime"] = now
+          
+          # Report metrics with a delay between attempts
+          max_attempts = 3
+          success = False
+          
+          for attempt in range(max_attempts):
+            print(f"Attempt {attempt+1}/{max_attempts}")
+            try:
+              for metric in metrics:
+                print(f"Testing metric {metric['name']}...")
+                response = requests.post(BILLING_ENDPOINT, json=metric, timeout=10)
+                print(f"Response status: {response.status_code}")
+                if response.status_code != 200:
+                  print(f"Failed to report metric {metric['name']}")
+                else:
+                  print(f"Successfully reported metric {metric['name']}")
+                  success = True
+              
+              if success:
+                break
+              
+              print(f"Retrying in 5 seconds...")
+              time.sleep(5)
+              
+            except Exception as e:
+              print(f"Error: {str(e)}")
+              print(f"Retrying in 5 seconds...")
+              time.sleep(5)
+          
+          exit(0 if success else 1)
+      env:
+        - name: KUBERNETES_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: RELEASE_NAME
+          value: {{ .Release.Name }}
+  restartPolicy: Never
+{{- end }} 
