@@ -33,6 +33,11 @@ properties:
                 resources: ["secrets", "configmaps", "persistentvolumeclaims"]
                 verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
   
+  # Service account name to use throughout the application
+  # This maps the serviceAccount from the marketplace test to our internal field
+  serviceAccount.name:
+    default: ${serviceAccount}
+  
   # Core database credentials for testing - minimal set for verification
   aktusPostgres.username:
     type: string
@@ -142,6 +147,27 @@ properties:
     description: Enable tracking and reporting of usage metrics
     default: true
     
+  billing.reportingSecret:
+    type: string
+    title: GCP Service Account Key for Billing
+    description: Base64-encoded service account key for reporting usage metrics
+    default: "ewogICJ0eXBlIjogInNlcnZpY2VfYWNjb3VudCIsCiAgInByb2plY3RfaWQiOiAiYWt0dXMtYWktcGxhdGZvcm0tcHVibGljIiwKICAicHJpdmF0ZV9rZXlfaWQiOiAidGVzdC1rZXktaWQiLAogICJwcml2YXRlX2tleSI6ICItLS0tLUJFR0lOIFBSSVZBVEUgS0VZLS0tLS1cbnRlc3Qta2V5XG4tLS0tLUVORCBQUklWQVRFIEtFWS0tLS0tIiwKICAiY2xpZW50X2VtYWlsIjogInRlc3RAYWt0dXMtYWktcGxhdGZvcm0tcHVibGljLmlhbS5nc2VydmljZWFjY291bnQuY29tIiwKICAiY2xpZW50X2lkIjogInRlc3QtaWQiLAogICJhdXRoX3VyaSI6ICJodHRwczovL2FjY291bnRzLmdvb2dsZS5jb20vby9vYXV0aDIvYXV0aCIsCiAgInRva2VuX3VyaSI6ICJodHRwczovL29hdXRoMi5nb29nbGVhcGlzLmNvbS90b2tlbiIsCiAgImF1dGhfcHJvdmlkZXJfeDUwOV9jZXJ0X3VybCI6ICJodHRwczovL3d3dy5nb29nbGVhcGlzLmNvbS9vYXV0aDIvdjEvY2VydHMiLAogICJjbGllbnRfeDUwOV9jZXJ0X3VybCI6ICJodHRwczovL3d3dy5nb29nbGVhcGlzLmNvbS9yb2JvdC92MS9tZXRhZGF0YS94NTA5L3Rlc3RAYWt0dXMtYWktcGxhdGZvcm0tcHVibGljLmlhbS5nc2VydmljZWFjY291bnQuY29tIgp9"
+    x-google-marketplace:
+      type: STRING
+      
+  billing.serviceName:
+    type: string
+    title: Billing Service Name
+    description: Service name for usage tracking
+    default: "aktus-ai-platform-test"
+    
+  billing.consumerId:
+    type: string
+    title: Billing Consumer ID
+    description: Consumer ID for usage tracking (must start with 'project:')
+    default: "project:aktus-ai-platform-public"
+    pattern: ^project:.*$
+
   # API keys for external services
   secrets.openaiApiKey:
     type: string
@@ -176,5 +202,8 @@ required:
   - aktusInference.storage.docProcessing.bucketName
   - aktusInference.storage.extractedData.bucketName
   - billing.enabled
+  - billing.reportingSecret
+  - billing.serviceName
+  - billing.consumerId
   - secrets.openaiApiKey
   - secrets.huggingfaceLoginKey
