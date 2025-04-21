@@ -9,10 +9,10 @@ x-google-marketplace:
       Initial release of Aktus AI Platform.
   clusterConstraints:
     resources:
-      - replicas: 1-2
+      - replicas: 1-5
         requests:
-          cpu: 10000m
-          memory: 72Gi
+          cpu: 4000m
+          memory: 16Gi
         affinity:
           simpleNodeAffinity:
             type: REQUIRE
@@ -30,34 +30,42 @@ x-google-marketplace:
       properties:
         aktus-inference-service.aktusInference.image:
           type: FULL
+          default: us-docker.pkg.dev/aktus-ai-platform-public/aktus-platform-marketplace/aktus-inference:v1.0.0
     mdi:
       properties:
         aktus-multimodal-data-ingestion-service.aktusMdi.image:
           type: FULL
+          default: us-docker.pkg.dev/aktus-ai-platform-public/aktus-platform-marketplace/aktus-multimodal-data-ingestion:v1.0.0
     research:
       properties:
         aktus-research-service.aktusResearch.image:
           type: FULL
+          default: us-docker.pkg.dev/aktus-ai-platform-public/aktus-platform-marketplace/aktus-research:v1.0.0
     database:
       properties:
         aktus-database-service.aktusDatabase.image:
           type: FULL
+          default: us-docker.pkg.dev/aktus-ai-platform-public/aktus-platform-marketplace/aktus-db-manager:v1.0.0
     embedding:
       properties:
         aktus-embedding-service.aktusEmbedding.image:
           type: FULL
+          default: us-docker.pkg.dev/aktus-ai-platform-public/aktus-platform-marketplace/aktus-embedding:v1.0.0
     postgres:
       properties:
         aktus-postgres-service.aktusPostgres.image:
           type: FULL
+          default: postgres:13.16
     rabbitmq:
       properties:
         rabbitmq.rabbitmq.image:
           type: FULL
+          default: rabbitmq:3.13-management-alpine
     redis:
       properties:
         redis.redis.image:
           type: FULL
+          default: redis:7.2-alpine
   billable:
     enabled: true
     costStructure:
@@ -70,6 +78,14 @@ x-google-marketplace:
           description: Price per hour of inference computation
           priceInUsd: 5.00
           unitOfMeasure: hour
+          unitQuantityMultiplier: 0.0002777778 # Converts seconds to hours
+          displayQuantityUnit: hour
+          displayQuantityBase: 3600 # 1 hour = 3600 seconds
+          displayQuantityMultiplier: 0.0002777778 # 1/3600
+          stockUnit: second
+          stockUnitMultiplier: 1
+          stockUnitConverterToDisplayQuantity: 0.0002777778 # 1/3600
+          reportingGranularity: DAILY
           metricName: aktus_inference_time_seconds
 
 properties:
@@ -99,6 +115,15 @@ properties:
               - apiGroups: [""]
                 resources: ["secrets", "configmaps", "persistentvolumeclaims"]
                 verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+  
+  serviceAccount.name:
+    type: string
+    title: Service Account Name
+    description: The name of the service account used by the application components
+    x-google-marketplace:
+      type: STRING
+      serviceAccount:
+        description: Service account used by application components
   
   # Database configurations
   aktusPostgres.username:
@@ -206,17 +231,40 @@ properties:
     description: GCS bucket name for extracted document data
     default: aktus-ai-platform-ext-data
 
+  # Billing Configuration
   billing.enabled:
     type: boolean
     title: Enable Usage-Based Billing
     description: Enable tracking and reporting of usage metrics
     default: true
 
+  billing.reportingSecret:
+    type: string
+    title: GCP Service Account Key for Billing
+    description: Base64-encoded Google Cloud service account key for reporting usage metrics
+    default: "ewogICJ0eXBlIjogInNlcnZpY2VfYWNjb3VudCIsCiAgInByb2plY3RfaWQiOiAiYWt0dXMtYWktcGxhdGZvcm0tcHVibGljIiwKICAicHJpdmF0ZV9rZXlfaWQiOiAidGVzdC1rZXktaWQiLAogICJwcml2YXRlX2tleSI6ICItLS0tLUJFR0lOIFBSSVZBVEUgS0VZLS0tLS1cbnRlc3Qta2V5XG4tLS0tLUVORCBQUklWQVRFIEtFWS0tLS0tIiwKICAiY2xpZW50X2VtYWlsIjogInRlc3RAYWt0dXMtYWktcGxhdGZvcm0tcHVibGljLmlhbS5nc2VydmljZWFjY291bnQuY29tIiwKICAiY2xpZW50X2lkIjogInRlc3QtaWQiLAogICJhdXRoX3VyaSI6ICJodHRwczovL2FjY291bnRzLmdvb2dsZS5jb20vby9vYXV0aDIvYXV0aCIsCiAgInRva2VuX3VyaSI6ICJodHRwczovL29hdXRoMi5nb29nbGVhcGlzLmNvbS90b2tlbiIsCiAgImF1dGhfcHJvdmlkZXJfeDUwOV9jZXJ0X3VybCI6ICJodHRwczovL3d3dy5nb29nbGVhcGlzLmNvbS9vYXV0aDIvdjEvY2VydHMiLAogICJjbGllbnRfeDUwOV9jZXJ0X3VybCI6ICJodHRwczovL3d3dy5nb29nbGVhcGlzLmNvbS9yb2JvdC92MS9tZXRhZGF0YS94NTA5L3Rlc3RAYWt0dXMtYWktcGxhdGZvcm0tcHVibGljLmlhbS5nc2VydmljZWFjY291bnQuY29tIgp9"
+    x-google-marketplace:
+      type: STRING
+      
+  billing.serviceName:
+    type: string
+    title: Billing Service Name
+    description: Service name for usage tracking
+    default: aktus-ai-platform.endpoints.aktus-ai-platform-public.cloud.goog
+    
+  billing.consumerId:
+    type: string
+    title: Billing Consumer ID
+    description: Consumer ID for usage tracking (must start with 'project:')
+    default: project:aktus-ai-platform-public
+    pattern: ^project:.*$
+
   # API keys for external services
   secrets.openaiApiKey:
     type: string
     title: OpenAI API Key
     description: API key for OpenAI services
+    default: "dummy-key-for-testing"
     x-google-marketplace:
       type: MASKED_FIELD
       
@@ -224,6 +272,7 @@ properties:
     type: string
     title: Hugging Face Login Key
     description: Login key for accessing Hugging Face models
+    default: "dummy-key-for-testing"
     x-google-marketplace:
       type: MASKED_FIELD
 
@@ -248,5 +297,8 @@ required:
   - aktusInference.storage.docProcessing.bucketName
   - aktusInference.storage.extractedData.bucketName
   - billing.enabled
+  - billing.reportingSecret
+  - billing.serviceName
+  - billing.consumerId
   - secrets.openaiApiKey
   - secrets.huggingfaceLoginKey

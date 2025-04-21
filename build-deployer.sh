@@ -1,59 +1,64 @@
-#!/bin/bash
-# Script to build and push the Aktus AI Platform deployer image for GCP Marketplace
+set -e 
 
-set -e
+REGISTRY=us-docker.pkg.dev/aktus-ai-platform-public/aktus-platform-marketplace
 
-PROJECT_ID="aktus-ai-platform-public"
-VERSION="1.0.0"
-TRACK="1.0"
-APP_NAME="aktus-platform"
+if [ -z "$APP_NAME" ]; then
+  APP_NAME="aktus-ai-platform"
+fi
 
-IMAGE_NAME="us-docker.pkg.dev/${PROJECT_ID}/aktus-platform-marketplace/deployer"
+if [ -z "$MARKETPLACE_TOOLS_TAG" ]; then
+  MARKETPLACE_TOOLS_TAG=latest
+fi
 
-if [ ! -d "chart/aktus-ai-platform" ]; then
-  echo "Error: This script must be run from the root of your repository"
-  echo "Current directory structure:"
-  ls -la
+VERSION=$(grep 'publishedVersion:' schema.yaml | cut -d'"' -f2)
+if [ -z "$VERSION" ]; then
+  echo "Error: Unable to parse version from schema.yaml"
   exit 1
 fi
 
-mkdir -p apptest/deployer/manifest
+TRACK=${VERSION%.*}
 
-if [ ! -f "apptest/schema.yaml" ]; then
-  echo "Error: apptest/schema.yaml not found"
-  exit 1
+DEPLOYER_IMAGE="$REGISTRY/deployer:$VERSION"
+DEPLOYER_TRACK_IMAGE="$REGISTRY/deployer:$TRACK"
+echo "Building $DEPLOYER_IMAGE and $DEPLOYER_TRACK_IMAGE"
+
+(cd chart/aktus-ai-platform && helm dependency update)
+
+docker buildx build --platform linux/amd64,linux/arm64 \
+             --build-arg REGISTRY="$REGISTRY" \
+             --build-arg TAG="$VERSION" \
+             --build-arg MARKETPLACE_TOOLS_TAG="$MARKETPLACE_TOOLS_TAG" \
+             --tag "$DEPLOYER_IMAGE" \
+             --tag "$DEPLOYER_TRACK_IMAGE" \
+             --push \
+             .
+
+echo "Images built: $DEPLOYER_IMAGE and $DEPLOYER_TRACK_IMAGE"
+
+if [ -n "$PUSH_IMAGE" ]; then
+  echo "Pushing images to registry..."
+  docker push "$DEPLOYER_IMAGE"
+  docker push "$DEPLOYER_TRACK_IMAGE"
+  echo "Images pushed successfully!"
 fi
 
-if [ ! -f "apptest/deployer/manifest/tester.yaml" ]; then
-  echo "Error: apptest/deployer/manifest/tester.yaml not found"
-  exit 1
+
+if [ -n "$VERIFY" ]; then
+  echo "Running verification..."
+  mpdev /scripts/verify --deployer="$DEPLOYER_IMAGE"
+  echo "Verification completed!"
 fi
 
-if [ ! -f "schema.yaml" ]; then
-  echo "Error: schema.yaml not found in the current directory"
-  exit 1
+
+if [ -n "$DEPLOY" ]; then
+  echo "Running test deployment..."
+  
+  kubectl get namespace test-ns > /dev/null 2>&1 || kubectl create namespace test-ns
+  
+  mpdev install \
+    --deployer="$DEPLOYER_IMAGE" \
+    --parameters='{"name": "aktus-test", "namespace": "test-ns", "serviceAccount": "aktus-ai-platform-sa"}'
+  echo "Test deployment completed!"
 fi
 
-echo "Building multi-arch deployer image locally: ${IMAGE_NAME}:${VERSION}"
-docker buildx build \
-  -f ./Dockerfile \
-  --platform linux/amd64,linux/arm64 \
-  --no-cache \
-  --build-arg REGISTRY=us-docker.pkg.dev/${PROJECT_ID}/aktus-platform-marketplace/${APP_NAME} \
-  --build-arg TAG=${VERSION} \
-  --tag ${IMAGE_NAME}:${VERSION} \
-  --tag ${IMAGE_NAME}:${TRACK} \
-  --load .
-
-gcloud auth configure-docker us-docker.pkg.dev
-echo "Pushing multi-arch image: ${IMAGE_NAME}:${VERSION} and :${TRACK}"
-docker push ${IMAGE_NAME}:${VERSION}
-docker push ${IMAGE_NAME}:${TRACK}
-
-echo "Successfully built and pushed multi-arch deployer image: ${IMAGE_NAME}:${VERSION}"
-echo ""
-echo "To verify your application, run:"
-echo "mpdev /scripts/verify --deployer=${IMAGE_NAME}:${VERSION}"
-echo ""
-echo "To submit this version for review, use Partner Portal and specify:"
-echo "Deployer Image: ${IMAGE_NAME}:${VERSION}"
+echo "Done!"
