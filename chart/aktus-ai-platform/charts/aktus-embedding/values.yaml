@@ -2,7 +2,6 @@
 aktusEmbedding:
   image: us-docker.pkg.dev/aktus-ai-platform-public/aktus-platform-marketplace/aktus-embedding:v1.0.0
   imagePullPolicy: Always
-  serviceAccount: aktus-ai-platform-sa
   port: 8080
   auth:
     username: "guest"

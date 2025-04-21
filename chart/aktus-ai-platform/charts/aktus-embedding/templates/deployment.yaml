@@ -18,7 +18,7 @@ spec:
         app: aktus-embedding-service
     spec:
       terminationGracePeriodSeconds: 60
-      serviceAccountName: aktus-ai-platform-sa
+      serviceAccountName: {{ $.Values.global.serviceAccount.name }}
       containers:
         - name: aktus-embedding-service
           image: "{{ .Values.aktusEmbedding.image }}"

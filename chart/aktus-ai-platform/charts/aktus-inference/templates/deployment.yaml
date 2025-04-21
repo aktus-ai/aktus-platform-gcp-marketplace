@@ -84,7 +84,7 @@ spec:
               nvidia.com/gpu: 1
             requests:
               nvidia.com/gpu: 1
-      serviceAccountName: aktus-ai-platform-sa
+      serviceAccountName: {{ $.Values.global.serviceAccount.name }}
       volumes:
         - name: models-data
           csi:

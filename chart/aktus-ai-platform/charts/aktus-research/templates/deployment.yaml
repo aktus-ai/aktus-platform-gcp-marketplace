@@ -18,7 +18,7 @@ spec:
     spec:
       terminationGracePeriodSeconds: 60
       
-      serviceAccountName: aktus-ai-platform-sa
+      serviceAccountName: {{ $.Values.global.serviceAccount.name }}
       containers:
         - name: aktus-research-service
           image: {{ .Values.aktusResearch.image }}

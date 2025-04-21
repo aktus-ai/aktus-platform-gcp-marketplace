@@ -16,7 +16,7 @@ spec:
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 10 }}
       {{- end }}
-      serviceAccountName: aktus-ai-platform-sa
+      serviceAccountName: {{ $.Values.global.serviceAccount.name }}
       containers:
       - name: aktus-database-service
         {{- if .Values.containerSecurityContext }}
