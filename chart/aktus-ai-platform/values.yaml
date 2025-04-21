@@ -2,7 +2,7 @@
 rabbitmq:
   enabled: true
   rabbitmq:
-    image: rabbitmq:3.13-management-alpine
+    image: docker.io/library/rabbitmq:3.13-management-alpine
     username: guest
     password: guest
     port: 5672
@@ -11,15 +11,21 @@ rabbitmq:
 redis:
   enabled: true
   redis:
-    image: redis:7.2-alpine
+    image: docker.io/library/redis:7.2-alpine
     persistence:
       enabled: true
       size: 50Gi
       storageClass: standard-rwo
       accessMode: ReadWriteOnce
 
+serviceAccount:
+  # The name of the service account to use
+  name: "aktus-ai-platform-sa"
+
 # Global values passed to all subcharts
 global:
+  serviceAccount:
+    name: "aktus-ai-platform-sa"
   billing:
     enabled: true
     reportingEndpoint: "billing:8090/report"
@@ -27,14 +33,14 @@ global:
 # Billing configuration
 billing:
   enabled: true
-  reportingSecret: "ewogICJ0eXBlIjogInNlcnZpY2VfYWNjb3VudCIsCiAgInByb2plY3RfaWQiOiAiZHVtbXktcHJvamVjdCIsCiAgInByaXZhdGVfa2V5X2lkIjogImR1bW15LWlkIiwKICAicHJpdmF0ZV9rZXkiOiAiLS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tXG5kdW1teS1rZXlcbi0tLS0tRU5EIFBSSVZBVEUgS0VZLS0tLS0iLAogICJjbGllbnRfZW1haWwiOiAiZHVtbXlAZHVtbXktcHJvamVjdC5pYW0uZ3NlcnZpY2VhY2NvdW50LmNvbSIsCiAgImNsaWVudF9pZCI6ICJkdW1teS1pZCIsCiAgImF1dGhfdXJpIjogImh0dHBzOi8vYWNjb3VudHMuZ29vZ2xlLmNvbS9vL29hdXRoMi9hdXRoIiwKICAidG9rZW5fdXJpIjogImh0dHBzOi8vb2F1dGgyLmdvb2dsZWFwaXMuY29tL3Rva2VuIiwKICAiYXV0aF9wcm92aWRlcl94NTA5X2NlcnRfdXJsIjogImh0dHBzOi8vd3d3Lmdvb2dsZWFwaXMuY29tL29hdXRoMi92MS9jZXJ0cyIsCiAgImNsaWVudF94NTA5X2NlcnRfdXJsIjogImh0dHBzOi8vd3d3Lmdvb2dsZWFwaXMuY29tL3JvYm90L3YxL21ldGFkYXRhL3g1MDkvZHVtbXlAZHVtbXktcHJvamVjdC5pYW0uZ3NlcnZpY2VhY2NvdW50LmNvbSIKfQ=="
-  serviceName: "YWt0dXMtYWktcGxhdGZvcm0="
-  consumerId: "cHJvamVjdDphamtucy1haTppdU5DWnFQdmN3ejR6aGI="
+  reportingSecret: ""
+  serviceName: "aktus-ai-platform"
+  consumerId: "project:aktus-ai-platform-public"
 
 # Core Services
 aktus-database-service:
   enabled: true
-  serviceAccount: "aktus-ai-platform-sa"
+  serviceAccount: "{{ .Values.serviceAccount.name }}"
   aktusDatabase:
     image: us-docker.pkg.dev/aktus-ai-platform-public/aktus-platform-marketplace/aktus-db-manager:v1.0.0
     dbConfig:
@@ -49,7 +55,7 @@ aktus-inference-service:
   aktusInference:
     image: us-docker.pkg.dev/aktus-ai-platform-public/aktus-platform-marketplace/aktus-inference:v1.0.0
     serviceAccount:
-      name: "aktus-ai-platform-sa"
+      name: "{{ .Values.serviceAccount.name }}"
     nodeSelector:
       cloud.google.com/gke-accelerator: nvidia-tesla-a100
     resources:
@@ -69,7 +75,7 @@ aktus-inference-service:
 aktus-research-service:
   enabled: true
   serviceAccount:
-    name: "aktus-platform-models"
+    name: "{{ .Values.serviceAccount.name }}"
   aktusResearch:
     image: us-docker.pkg.dev/aktus-ai-platform-public/aktus-platform-marketplace/aktus-research:v1.0.0
     modelInference:
@@ -86,7 +92,7 @@ aktus-multimodal-data-ingestion-service:
   enabled: true
   aktusMdi:
     image: us-docker.pkg.dev/aktus-ai-platform-public/aktus-platform-marketplace/aktus-multimodal-data-ingestion:v1.0.0
-    serviceAccount: "aktus-ai-platform-sa"
+    serviceAccount: "{{ .Values.serviceAccount.name }}"
     rabbitmq:
       host: "rabbitmq"
       port: "5672"
@@ -115,8 +121,9 @@ aktus-embedding-service:
 # PostgreSQL configuration
 aktus-postgres-service:
   enabled: true
+  serviceAccount: "{{ .Values.serviceAccount.name }}"
   aktusPostgres:
-    image: postgres:13.16
+    image: docker.io/library/postgres:13.16
     username: "root"
     password: "secret"
     database: "root"
@@ -126,7 +133,6 @@ aktus-postgres-service:
       storageClass: standard-rwo
       accessMode: ReadWriteOnce
       subPath: postgresql-data
-  serviceAccount: "default"
 
 # Storage configuration
 storage:
