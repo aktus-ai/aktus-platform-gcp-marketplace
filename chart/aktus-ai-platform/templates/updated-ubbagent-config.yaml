@@ -1,0 +1,40 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: aktus-deploy-ubbagent-config
+  namespace: test-ns
+  labels:
+    app.kubernetes.io/name: aktus-deploy
+data:
+  config.yaml: |-
+    identities:
+    - name: gcp
+      gcp:
+        encodedServiceAccountKey: "ewogICJ0eXBlIjogInNlcnZpY2VfYWNjb3VudCIsCiAgInByb2plY3RfaWQiOiAiYWt0dXMtYWktcGxhdGZvcm0tcHVibGljIiwKICAicHJpdmF0ZV9rZXlfaWQiOiAidGVzdC1rZXktaWQiLAogICJwcml2YXRlX2tleSI6ICItLS0tLUJFR0lOIFBSSVZBVEUgS0VZLS0tLS1cbnRlc3Qta2V5XG4tLS0tLUVORCBQUklWQVRFIEtFWS0tLS0tIiwKICAiY2xpZW50X2VtYWlsIjogInRlc3RAYWt0dXMtYWktcGxhdGZvcm0tcHVibGljLmlhbS5nc2VydmljZWFjY291bnQuY29tIiwKICAiY2xpZW50X2lkIjogInRlc3QtaWQiLAogICJhdXRoX3VyaSI6ICJodHRwczovL2FjY291bnRzLmdvb2dsZS5jb20vby9vYXV0aDIvYXV0aCIsCiAgInRva2VuX3VyaSI6ICJodHRwczovL29hdXRoMi5nb29nbGVhcGlzLmNvbS90b2tlbiIsCiAgImF1dGhfcHJvdmlkZXJfeDUwOV9jZXJ0X3VybCI6ICJodHRwczovL3d3dy5nb29nbGVhcGlzLmNvbS9vYXV0aDIvdjEvY2VydHMiLAogICJjbGllbnRfeDUwOV9jZXJ0X3VybCI6ICJodHRwczovL3d3dy5nb29nbGVhcGlzLmNvbS9yb2JvdC92MS9tZXRhZGF0YS94NTA5L3Rlc3RAYWt0dXMtYWktcGxhdGZvcm0tcHVibGljLmlhbS5nc2VydmljZWFjY291bnQuY29tIgp9"
+    metrics:
+    - name: aktus_inference_time_seconds
+      type: double
+      endpoints:
+      - name: servicecontrol
+      aggregation:
+        bufferSeconds: 60
+      monitoredResource: gcp_kubernetes_engine_service
+    endpoints:
+    - name: servicecontrol
+      servicecontrol:
+        identity: gcp
+        serviceName: "aktus-ai-platform.endpoints.aktus-ai-platform-public.cloud.goog"
+        consumerId: "project:aktus-ai-platform-public"
+      http:
+        endpoint: 0.0.0.0:8090
+    agent:
+      reportingInterval: 60s
+      onError: retry
+      endpointsCache:
+        expirationTime: 1m
+      endpoint_overrides: {}
+      daemonize: false
+      http:
+        enabled: true
+        port: 8090
+        binding: 0.0.0.0 

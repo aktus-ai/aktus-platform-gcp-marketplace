@@ -1,3 +1,6 @@
+{{- $reportingSecret := .Values.billing.reportingSecret -}}
+{{- $serviceName := .Values.billing.serviceName -}}
+{{- $consumerId := .Values.billing.consumerId -}}
 {{- if .Values.billing.enabled }}
 apiVersion: v1
 kind: ConfigMap
@@ -6,11 +9,11 @@ metadata:
   labels:
     app.kubernetes.io/name: {{ .Release.Name }}
 data:
-  config.yaml: |
+  config.yaml: |-
     identities:
     - name: gcp
       gcp:
-        encodedServiceAccountKey: $reporting_key
+        encodedServiceAccountKey: {{ $reportingSecret | quote }}
     metrics:
     - name: aktus_inference_time_seconds
       type: double
@@ -23,12 +26,12 @@ data:
     - name: servicecontrol
       servicecontrol:
         identity: gcp
-        serviceName: $service_name
-        consumerId: $consumer_id
+        serviceName: {{ $serviceName | quote }}
+        consumerId: {{ $consumerId | quote }}
     agent:
       reportingInterval: 60s
       onError: retry
       endpointsCache:
         expirationTime: 1m
       endpoint_overrides: {}
-{{- end }} 
+{{- end }}
