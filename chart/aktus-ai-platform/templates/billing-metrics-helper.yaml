@@ -41,7 +41,9 @@ data:
     
     # Determine the billing service name based on the release name (from env var)
     RELEASE_NAME = os.environ.get("RELEASE_NAME", "aktus-platform")
-    BILLING_SERVICE = f"{RELEASE_NAME}-billing.{NAMESPACE}"
+    
+    # Use the fully qualified Kubernetes service DNS name
+    BILLING_SERVICE = f"{RELEASE_NAME}-billing.{NAMESPACE}.svc.cluster.local"
     
     # Billing agent endpoint
     BILLING_ENDPOINT = f"http://{BILLING_SERVICE}:8090/report"
