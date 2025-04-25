@@ -1,6 +1,6 @@
 # charts/redis/values.yaml
 redis:
-  image: docker.io/library/redis:7.2-alpine
+  image: redis:7.4-alpine
   port: 6379
   persistence:
     enabled: true
