@@ -19,13 +19,11 @@ redis:
       accessMode: ReadWriteOnce
 
 serviceAccount:
-  # The name of the service account to use
   name: "aktus-ai-platform-sa"
 
 # Global values passed to all subcharts
 global:
-  serviceAccount:
-    name: "aktus-ai-platform-sa"
+  serviceAccountName: "aktus-ai-platform-sa"
   billing:
     enabled: true
     reportingEndpoint: "billing:8090/report"
@@ -139,5 +137,5 @@ storage:
   chroma:
     size: "500Gi"
 
-tester:
-  image: us-docker.pkg.dev/aktus-ai-platform-public/aktus-platform-marketplace/service-tests:v1.0.0
+# tester:
+#   image: us-docker.pkg.dev/aktus-ai-platform-public/aktus-platform-marketplace/service-tests:v1.0.0
