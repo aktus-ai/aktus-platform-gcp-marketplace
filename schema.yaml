@@ -7,12 +7,19 @@ x-google-marketplace:
   publishedVersionMetadata:
     releaseNote: >-
       Initial release of Aktus AI Platform.
+  supportUrl: https://support.aktus.ai
+  supportDescription: >-
+    Aktus AI Platform offers multiple support tiers including Standard (email support with 24-48 hour response time 
+    during business hours), Premium (email and phone support with 4-8 hour response), and Enterprise (dedicated 
+    support manager with 1-4 hour response time). We provide comprehensive documentation, tutorials, and troubleshooting 
+    guides at docs.aktus.ai. For immediate assistance, contact support@aktus.ai or call +1 (555) 123-4567 for 
+    Premium and Enterprise customers.
   clusterConstraints:
     resources:
-      - replicas: 1-5
+      - replicas: 1-2
         requests:
-          cpu: 4000m
-          memory: 16Gi
+          cpu: 6000m
+          memory: 24Gi
         affinity:
           simpleNodeAffinity:
             type: REQUIRE
@@ -26,46 +33,30 @@ x-google-marketplace:
   managedUpdates:
     kalmSupported: false
   images:
-    inference:
+    aktus-inference:
       properties:
         aktus-inference-service.aktusInference.image:
           type: FULL
-          default: us-docker.pkg.dev/aktus-ai-platform-public/aktus-platform-marketplace/aktus-inference:v1.0.0
-    mdi:
+          default: us-docker.pkg.dev/aktus-ai-platform-public/aktus-platform-marketplace/aktus-inference:1.0.0
+    aktus-multimodal-data-ingestion:
       properties:
         aktus-multimodal-data-ingestion-service.aktusMdi.image:
           type: FULL
-          default: us-docker.pkg.dev/aktus-ai-platform-public/aktus-platform-marketplace/aktus-multimodal-data-ingestion:v1.0.0
-    research:
+          default: us-docker.pkg.dev/aktus-ai-platform-public/aktus-platform-marketplace/multimodal-data-ingestion:1.0.0
+    aktus-research:
       properties:
         aktus-research-service.aktusResearch.image:
           type: FULL
-          default: us-docker.pkg.dev/aktus-ai-platform-public/aktus-platform-marketplace/aktus-research:v1.0.0
-    database:
+          default: us-docker.pkg.dev/aktus-ai-platform-public/aktus-platform-marketplace/aktus-research:1.0.0
+    aktus-database:
       properties:
         aktus-database-service.aktusDatabase.image:
           type: FULL
-          default: us-docker.pkg.dev/aktus-ai-platform-public/aktus-platform-marketplace/aktus-db-manager:v1.0.0
-    embedding:
+    aktus-embedding:
       properties:
         aktus-embedding-service.aktusEmbedding.image:
           type: FULL
-          default: us-docker.pkg.dev/aktus-ai-platform-public/aktus-platform-marketplace/aktus-embedding:v1.0.0
-    postgres:
-      properties:
-        aktus-postgres-service.aktusPostgres.image:
-          type: FULL
-          default: postgres:13.16
-    rabbitmq:
-      properties:
-        rabbitmq.rabbitmq.image:
-          type: FULL
-          default: rabbitmq:3.13-management-alpine
-    redis:
-      properties:
-        redis.redis.image:
-          type: FULL
-          default: redis:7.2-alpine
+          default: us-docker.pkg.dev/aktus-ai-platform-public/aktus-platform-marketplace/aktus-embedding:1.0.0
   billable:
     enabled: true
     costStructure:
@@ -100,6 +91,7 @@ properties:
   serviceAccount:
     type: string
     title: Service Account
+    default: "aktus-ai-platform-sa"
     x-google-marketplace:
       type: SERVICE_ACCOUNT
       serviceAccount:
@@ -115,15 +107,6 @@ properties:
               - apiGroups: [""]
                 resources: ["secrets", "configmaps", "persistentvolumeclaims"]
                 verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
-  
-  serviceAccount.name:
-    type: string
-    title: Service Account Name
-    description: The name of the service account used by the application components
-    x-google-marketplace:
-      type: STRING
-      serviceAccount:
-        description: Service account used by application components
   
   # Database configurations
   aktusPostgres.username:
@@ -154,26 +137,13 @@ properties:
     type: string
     title: PostgreSQL Storage Size
     description: Size of the PostgreSQL persistent volume
-    default: 500Gi
+    default: 10Gi
   
   storage.chroma.size:
     type: string
     title: Vector Database Storage Size
     description: Size of the persistent volume for the vector database
-    default: 500Gi
-
-  # Infrastructure enabling flags
-  rabbitmq.enabled:
-    type: boolean
-    title: Enable RabbitMQ
-    description: Enable RabbitMQ message broker
-    default: true
-  
-  redis.enabled:
-    type: boolean
-    title: Enable Redis
-    description: Enable Redis cache
-    default: true
+    default: 10Gi
   
   # Service configurations
   aktus-inference-service.enabled:
@@ -279,23 +249,12 @@ properties:
 required:
   - name
   - namespace
-  - serviceAccount
-  - aktusPostgres.username
-  - aktusPostgres.password
-  - aktusPostgres.database
-  - aktusPostgres.persistence.size
   - storage.chroma.size
-  - rabbitmq.enabled
-  - redis.enabled
+  - aktus-database-service.enabled
+  - aktus-research-service.enabled
   - aktus-inference-service.enabled
   - aktus-multimodal-data-ingestion-service.enabled
   - aktus-embedding-service.enabled
-  - aktus-database-service.enabled
-  - aktus-research-service.enabled
-  - aktusInference.storage.models.bucketName
-  - aktusInference.storage.docUpload.bucketName
-  - aktusInference.storage.docProcessing.bucketName
-  - aktusInference.storage.extractedData.bucketName
   - billing.enabled
   - billing.reportingSecret
   - billing.serviceName
