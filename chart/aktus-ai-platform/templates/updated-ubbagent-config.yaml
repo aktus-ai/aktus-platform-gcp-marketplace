@@ -2,7 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: aktus-deploy-ubbagent-config
-  namespace: test-ns
+  namespace: {{ .Release.Namespace }}
   labels:
     app.kubernetes.io/name: aktus-deploy
 data:
