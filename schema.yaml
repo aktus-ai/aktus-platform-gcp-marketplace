@@ -7,27 +7,18 @@ x-google-marketplace:
   publishedVersionMetadata:
     releaseNote: >-
       Initial release of Aktus AI Platform.
-  supportUrl: https://support.aktus.ai
-  supportDescription: >-
-    Aktus AI Platform offers multiple support tiers including Standard (email support with 24-48 hour response time 
-    during business hours), Premium (email and phone support with 4-8 hour response), and Enterprise (dedicated 
-    support manager with 1-4 hour response time). We provide comprehensive documentation, tutorials, and troubleshooting 
-    guides at docs.aktus.ai. For immediate assistance, contact support@aktus.ai or call +1 (555) 123-4567 for 
-    Premium and Enterprise customers.
   clusterConstraints:
     resources:
-      - replicas: 1-2
-        requests:
-          cpu: 6000m
-          memory: 24Gi
-        affinity:
-          simpleNodeAffinity:
-            type: REQUIRE
-            matchExpressions:
-              - key: cloud.google.com/gke-accelerator
-                operator: In
-                values:
-                  - nvidia-tesla-a100
+    # GPU constraint removed as inference is disabled by default for testing
+    # - requests: # Entry for GPU resources
+    #     gpu:
+    #       nvidia.com/gpu:
+    #         limits: 1 # Match deployment request (any Nvidia GPU)
+    #         # Removed specific platforms constraint to allow any compatible GPU
+    - replicas: 2  # Entry for non-GPU resources
+      requests:
+        cpu: 6000m
+        memory: 24Gi
 
   # Service account configuration
   managedUpdates:
@@ -37,47 +28,48 @@ x-google-marketplace:
       properties:
         aktus-inference-service.aktusInference.image:
           type: FULL
-          default: us-docker.pkg.dev/aktus-ai-platform-public/aktus-platform-marketplace/aktus-inference:1.0.0
+          default: gcr.io/aktus-ai-platform-public/aktus-platform-marketplace/aktus-inference:1.0.0
     aktus-multimodal-data-ingestion:
       properties:
         aktus-multimodal-data-ingestion-service.aktusMdi.image:
           type: FULL
-          default: us-docker.pkg.dev/aktus-ai-platform-public/aktus-platform-marketplace/multimodal-data-ingestion:1.0.0
+          default: gcr.io/aktus-ai-platform-public/aktus-platform-marketplace/multimodal-data-ingestion:1.0.0
     aktus-research:
       properties:
         aktus-research-service.aktusResearch.image:
           type: FULL
-          default: us-docker.pkg.dev/aktus-ai-platform-public/aktus-platform-marketplace/aktus-research:1.0.0
+          default: gcr.io/aktus-ai-platform-public/aktus-platform-marketplace/aktus-research:1.0.0
     aktus-database:
       properties:
         aktus-database-service.aktusDatabase.image:
           type: FULL
+          default: gcr.io/aktus-ai-platform-public/aktus-platform-marketplace/aktus-database:1.0.0
     aktus-embedding:
       properties:
         aktus-embedding-service.aktusEmbedding.image:
           type: FULL
-          default: us-docker.pkg.dev/aktus-ai-platform-public/aktus-platform-marketplace/aktus-embedding:1.0.0
-  billable:
-    enabled: true
-    costStructure:
-      basePrice:
-        name: Per Node
-        description: Base price per node per month
-        priceInUsd: 200
-      additionalItems:
-        - name: Inference Compute
-          description: Price per hour of inference computation
-          priceInUsd: 5.00
-          unitOfMeasure: hour
-          unitQuantityMultiplier: 0.0002777778 # Converts seconds to hours
-          displayQuantityUnit: hour
-          displayQuantityBase: 3600 # 1 hour = 3600 seconds
-          displayQuantityMultiplier: 0.0002777778 # 1/3600
-          stockUnit: second
-          stockUnitMultiplier: 1
-          stockUnitConverterToDisplayQuantity: 0.0002777778 # 1/3600
-          reportingGranularity: DAILY
-          metricName: aktus_inference_time_seconds
+          default: gcr.io/aktus-ai-platform-public/aktus-platform-marketplace/aktus-embedding:1.0.0
+  # billable:
+  #   enabled: true
+  #   costStructure:
+  #     basePrice:
+  #       name: Per Node
+  #       description: Base price per node per month
+  #       priceInUsd: 200
+  #     additionalItems:
+  #       - name: Inference Compute
+  #         description: Price per hour of inference computation
+  #         priceInUsd: 5.00
+  #         unitOfMeasure: hour
+  #         unitQuantityMultiplier: 0.0002777778 # Converts seconds to hours
+  #         displayQuantityUnit: hour
+  #         displayQuantityBase: 3600 # 1 hour = 3600 seconds
+  #         displayQuantityMultiplier: 0.0002777778 # 1/3600
+  #         stockUnit: second
+  #         stockUnitMultiplier: 1
+  #         stockUnitConverterToDisplayQuantity: 0.0002777778 # 1/3600
+  #         reportingGranularity: DAILY
+  #         metricName: aktus_inference_time_seconds
 
 properties:
   name:
@@ -96,11 +88,9 @@ properties:
       type: SERVICE_ACCOUNT
       serviceAccount:
         description: >
-          GCP service account for the application. Needs permissions to manage secrets, configmaps, PVCs (Role provided) and broader cluster edit permissions (ClusterRole 'edit' provided) for managing application components.
+          GCP service account for the application. Needs permissions to manage secrets, configmaps, PVCs (Role provided below).
+          IMPORTANT: This service account, via Workload Identity, also requires GCP IAM roles to access GCS buckets used by the application (e.g., models, document upload/processing, extracted data). Grant the 'Storage Object Admin' (`roles/storage.objectAdmin`) role or a custom role with equivalent permissions (`storage.objects.list`, `storage.objects.get`, `storage.objects.create`, `storage.objects.delete`) on the project or relevant buckets to the Google Service Account used during deployment.
         roles:
-          - type: ClusterRole
-            rulesType: PREDEFINED
-            rulesFromRoleName: view
           - type: Role
             rulesType: CUSTOM
             rules:
