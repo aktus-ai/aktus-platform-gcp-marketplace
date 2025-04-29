@@ -3,8 +3,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: aktus-embedding
-  annotations:
-    gke-gcsfuse/volumes: "true"
 spec:
   replicas: 1
   selector:
@@ -12,8 +10,6 @@ spec:
       app: aktus-embedding-service
   template:
     metadata:
-      annotations:
-        gke-gcsfuse/volumes: "true"
       labels:
         app: aktus-embedding-service
     spec:
@@ -81,29 +77,13 @@ spec:
 
       volumes:
         - name: extracted-data
-          csi:
-            driver: gcsfuse.csi.storage.gke.io
-            readOnly: false
-            volumeAttributes:
-              bucketName: "{{ .Values.aktusEmbedding.storage.extractedData.bucketName }}"
-              mountOptions: "implicit-dirs"
+          emptyDir: {}
         - name: document-upload
-          csi:
-            driver: gcsfuse.csi.storage.gke.io
-            readOnly: false
-            volumeAttributes:
-              bucketName: "{{ .Values.aktusEmbedding.storage.docUpload.bucketName }}"
-              mountOptions: "implicit-dirs"
+          emptyDir: {}
         - name: doc-processing
-          csi:
-            driver: gcsfuse.csi.storage.gke.io
-            readOnly: false
-            volumeAttributes:
-              bucketName: "{{ .Values.aktusEmbedding.storage.docProcessing.bucketName }}"
-              mountOptions: "implicit-dirs"
+          emptyDir: {}
         - name: chroma-db
-          persistentVolumeClaim:
-            claimName: chroma-pvc
+          emptyDir: {}
         - name: nomic-dir
           emptyDir: {}
         - name: ephemeral

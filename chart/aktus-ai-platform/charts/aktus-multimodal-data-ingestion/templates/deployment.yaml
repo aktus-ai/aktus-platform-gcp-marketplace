@@ -3,8 +3,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: aktus-multimodal-data-ingestion
-  annotations:
-    gke-gcsfuse/volumes: "true"
 spec:
   replicas: 1
   selector:
@@ -12,8 +10,6 @@ spec:
       app: aktus-multimodal-data-ingestion-service
   template:
     metadata:
-      annotations:
-        gke-gcsfuse/volumes: "true"
       labels:
         app: aktus-multimodal-data-ingestion-service
     spec:
@@ -115,30 +111,10 @@ spec:
       serviceAccountName: {{ $.Values.global.serviceAccountName }}
       volumes:
         - name: models-data
-          csi:
-            driver: gcsfuse.csi.storage.gke.io
-            readOnly: {{ .Values.aktusMdi.storage.models.readOnly }}
-            volumeAttributes:
-              bucketName: {{ .Values.aktusMdi.storage.models.bucketName }}
-              mountOptions: "{{ .Values.aktusMdi.storage.models.mountOptions }}"
+          emptyDir: {}
         - name: doc-processing
-          csi:
-            driver: gcsfuse.csi.storage.gke.io
-            readOnly: {{ .Values.aktusMdi.storage.docProcessing.readOnly }}
-            volumeAttributes:
-              bucketName: {{ .Values.aktusMdi.storage.docProcessing.bucketName }}
-              mountOptions: "{{ .Values.aktusMdi.storage.docProcessing.mountOptions }}"
+          emptyDir: {}
         - name: extracted-data
-          csi:
-            driver: gcsfuse.csi.storage.gke.io
-            readOnly: {{ .Values.aktusMdi.storage.extractedData.readOnly }}
-            volumeAttributes:
-              bucketName: {{ .Values.aktusMdi.storage.extractedData.bucketName }}
-              mountOptions: "{{ .Values.aktusMdi.storage.extractedData.mountOptions }}"
+          emptyDir: {}
         - name: document-upload
-          csi:
-            driver: gcsfuse.csi.storage.gke.io
-            readOnly: {{ .Values.aktusMdi.storage.docUpload.readOnly }}
-            volumeAttributes:
-              bucketName: {{ .Values.aktusMdi.storage.docUpload.bucketName }}
-              mountOptions: "{{ .Values.aktusMdi.storage.docUpload.mountOptions }}"
+          emptyDir: {}

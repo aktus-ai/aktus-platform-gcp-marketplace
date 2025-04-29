@@ -1,0 +1,13 @@
+{{- if .Values.secrets.huggingfaceLoginKey }}
+apiVersion: v1
+kind: Secret
+metadata:
+  name: aktus-huggingface-secret # Assuming a name convention
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: "{{ .Release.Name }}"
+    app.kubernetes.io/managed-by: "{{ .Release.Service }}"
+type: Opaque
+data:
+  login-key: {{ .Values.secrets.huggingfaceLoginKey | b64enc }} # Changed key name to match expected
+{{- end }}

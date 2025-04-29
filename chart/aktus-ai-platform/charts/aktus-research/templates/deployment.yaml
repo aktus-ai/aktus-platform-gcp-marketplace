@@ -2,8 +2,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: aktus-research
-  annotations:
-    gke-gcsfuse/volumes: "true"
 spec:
   replicas: 1
   selector:
@@ -11,8 +9,6 @@ spec:
       app: aktus-research-service
   template:
     metadata:
-      annotations:
-        gke-gcsfuse/volumes: "true"
       labels:
         app: aktus-research-service
     spec:
@@ -75,23 +71,8 @@ spec:
             failureThreshold: {{ .Values.healthcheck.failureThreshold }}
       volumes:
         - name: document-upload
-          csi:
-            driver: gcsfuse.csi.storage.gke.io
-            readOnly: false
-            volumeAttributes:
-              bucketName: {{ .Values.aktusResearch.storage.documentUpload.bucketName }}
-              mountOptions: "{{ .Values.aktusResearch.storage.documentUpload.mountOptions }}"
+          emptyDir: {}
         - name: doc-processing
-          csi:
-            driver: gcsfuse.csi.storage.gke.io
-            readOnly: false
-            volumeAttributes:
-              bucketName: {{ .Values.aktusResearch.storage.docProcessing.bucketName }}
-              mountOptions: "{{ .Values.aktusResearch.storage.docProcessing.mountOptions }}"
+          emptyDir: {}
         - name: extracted-data
-          csi:
-            driver: gcsfuse.csi.storage.gke.io
-            readOnly: false
-            volumeAttributes:
-              bucketName: {{ .Values.aktusResearch.storage.extractedData.bucketName }}
-              mountOptions: "{{ .Values.aktusResearch.storage.extractedData.mountOptions }}"
+          emptyDir: {}

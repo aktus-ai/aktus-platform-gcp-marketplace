@@ -19,11 +19,11 @@ redis:
       accessMode: ReadWriteOnce
 
 serviceAccount:
-  name: "aktus-ai-platform-sa"
+  name: "aktus-service-account"
 
 # Global values passed to all subcharts
 global:
-  serviceAccountName: "aktus-ai-platform-sa"
+  serviceAccountName: "aktus-service-account"
   billing:
     enabled: true
     reportingEndpoint: "billing:8090/report"

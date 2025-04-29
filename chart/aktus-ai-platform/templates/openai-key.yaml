@@ -1,0 +1,13 @@
+{{- if .Values.secrets.openaiApiKey }}
+apiVersion: v1
+kind: Secret
+metadata:
+  name: aktus-openai-secret
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: "{{ .Release.Name }}"
+    app.kubernetes.io/managed-by: "{{ .Release.Service }}"
+type: Opaque
+data:
+  aktus-openai-key: {{ .Values.secrets.openaiApiKey | b64enc }}
+{{- end }}

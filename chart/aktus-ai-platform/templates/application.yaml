@@ -18,9 +18,14 @@ spec:
     maintainers:
     - name: Aktus AI
       url: https://aktus.ai/
+      email: support@aktus.ai
     links:
     - description: Aktus AI
       url: https://aktus.ai/
+    - description: Support
+      url: https://support.aktus.ai/
+    - description: Documentation
+      url: https://docs.aktus.ai/
     notes: |-
       # Aktus AI Platform
 
@@ -92,6 +97,8 @@ spec:
     kind: Secret
   - group: ""
     kind: ConfigMap
+  - group: ""
+    kind: ServiceAccount
   info:
   - name: Research Service (HTTP)
     type: Reference

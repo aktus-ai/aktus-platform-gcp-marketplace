@@ -3,8 +3,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: aktus-inference
-  annotations:
-    gke-gcsfuse/volumes: "true"
 spec:
   replicas: 1
   selector:
@@ -12,15 +10,9 @@ spec:
       app: aktus-inference-service
   template:
     metadata:
-      annotations:
-        kubernetes.io/gpu-accelerator: "true"
-        gke-gcsfuse/volumes: "true"
       labels:
         app: aktus-inference-service
     spec:
-      nodeSelector:
-        kubernetes.io/arch: amd64
-        cloud.google.com/gke-accelerator: nvidia-tesla-a100
       terminationGracePeriodSeconds: 60
       containers:
         - name: aktus-inference-service
@@ -46,17 +38,13 @@ spec:
             - name: YOLO_LAYOUT_PARSER_DEFAULT_MODEL_PATH
               value: "{{ .Values.aktusInference.modelConfig.yolo.modelPath }}"
             - name: SERVER_URI
-              value: {{ .Values.aktusInference.serverConfig.uri | quote }}
+              value: "{{ .Values.aktusInference.serverConfig.uri }}"
             - name: ENABLE_FLASH_ATTENTION
-              value: {{ .Values.aktusInference.serverConfig.enableFlashAttention | quote }}
+              value: "false"
             - name: HF_LOCAL_FILES_ONLY
-              value: {{ .Values.aktusInference.serverConfig.hfLocalFilesOnly | quote }}
+              value: "{{ .Values.aktusInference.serverConfig.hfLocalFilesOnly }}"
             - name: DEFAULT_DEVICE
-              value: {{ .Values.aktusInference.serverConfig.defaultDevice | quote }}
-            - name: NVIDIA_VISIBLE_DEVICES
-              value: "all"
-            - name: CUDA_VISIBLE_DEVICES
-              value: "0,1"
+              value: "cpu"
             - name: SERVICE_PORT
               value: "{{ .Values.aktusInference.grpcPort }}"
             {{- if $.Values.global.billing.enabled }}
@@ -79,34 +67,14 @@ spec:
               mountPath: /usr/local/lib/python3.8/site-packages/billing_metrics.py
               subPath: billing_metrics.py
             {{- end }}
-          resources:
-            limits:
-              nvidia.com/gpu: 1
-            requests:
-              nvidia.com/gpu: 1
       serviceAccountName: {{ $.Values.global.serviceAccountName }}
       volumes:
         - name: models-data
-          csi:
-            driver: gcsfuse.csi.storage.gke.io
-            readOnly: false
-            volumeAttributes:
-              bucketName: "{{ .Values.aktusInference.storage.models.bucketName }}"
-              mountOptions: "{{ .Values.aktusInference.storage.models.mountOptions }}"
+          emptyDir: {}
         - name: document-upload
-          csi:
-            driver: gcsfuse.csi.storage.gke.io
-            readOnly: false
-            volumeAttributes:
-              bucketName: "{{ .Values.aktusInference.storage.docUpload.bucketName }}"
-              mountOptions: "{{ .Values.aktusInference.storage.docUpload.mountOptions }}"
+          emptyDir: {}
         - name: doc-processing
-          csi:
-            driver: gcsfuse.csi.storage.gke.io
-            readOnly: false
-            volumeAttributes:
-              bucketName: "{{ .Values.aktusInference.storage.docProcessing.bucketName }}"
-              mountOptions: "{{ .Values.aktusInference.storage.docProcessing.mountOptions }}"
+          emptyDir: {}
         {{- if $.Values.global.billing.enabled }}
         - name: billing-helper
           configMap:
