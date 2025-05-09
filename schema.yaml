@@ -80,6 +80,12 @@ properties:
     type: string
     x-google-marketplace:
       type: NAMESPACE
+  projectId:
+    type: string
+    title: GCP Project ID
+    description: The Google Cloud project ID where the service account is created
+    x-google-marketplace:
+      type: PROJECT_ID
   serviceAccount:
     type: string
     title: Service Account
