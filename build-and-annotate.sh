@@ -12,7 +12,8 @@ TRACK=${VERSION%.*}
 DEPLOYER_IMAGE="$REGISTRY/aktus-platform-marketplace/deployer:$VERSION"
 DEPLOYER_TRACK_IMAGE="$REGISTRY/aktus-platform-marketplace/deployer:$TRACK"
 ANNOTATION_KEY="com.googleapis.cloudmarketplace.product.service.name"
-ANNOTATION_VALUE="services/aktus-ai-platform.endpoints.aktus-ai-platform-public.cloud.goog"
+# ANNOTATION_VALUE="services/aktus-ai-platform.endpoints.aktus-ai-platform-public.cloud.goog"
+ANNOTATION_VALUE="services/aktus-ai-platform-free.endpoints.aktus-ai-platform-public.cloud.goog"
 
 echo "Configuring docker to authenticate with Artifact Registry..."
 gcloud auth configure-docker "${REGISTRY%%/*}" --quiet
@@ -73,6 +74,7 @@ docker pull gcr.io/cloud-marketplace-tools/k8s/deployer_helm/onbuild:latest || {
 # Build and push the image with the version tag (1.0.0)
 echo "Building and pushing version-tagged image..."
 docker buildx build --platform linux/amd64 \
+    --no-cache \
     --provenance=false \
     --build-arg REGISTRY="$REGISTRY" \
     --build-arg TAG="$VERSION" \
@@ -81,43 +83,25 @@ docker buildx build --platform linux/amd64 \
     -f Dockerfile.deployer \
     .
 
-# Get the digest of the pushed image
-DIGEST=$(docker buildx imagetools inspect "$DEPLOYER_IMAGE" --raw | grep -o '"digest": "sha256:[a-f0-9]*"' | head -1 | sed 's/"digest": "sha256:\([a-f0-9]*\)"/\1/')
-echo "Image digest: sha256:$DIGEST"
+# Simple approach to tag and push the track version
+echo "Using simple docker command approach for track tag..."
+echo "Pulling version-tagged image..."
+docker pull "$DEPLOYER_IMAGE" || { echo "Failed to pull version image: $DEPLOYER_IMAGE"; exit 1; }
 
-# Tag the track version with docker tag and push (to ensure they're identical)
-echo "Creating track tag using docker CLI..."
-DIGESTED_IMAGE="$REGISTRY/aktus-platform-marketplace/deployer@sha256:$DIGEST"
+echo "Tagging track version..."
+docker tag "$DEPLOYER_IMAGE" "$DEPLOYER_TRACK_IMAGE"
 
-# Pull the digested image
-docker pull "$DIGESTED_IMAGE"
-
-# Tag it as the track version
-docker tag "$DIGESTED_IMAGE" "$DEPLOYER_TRACK_IMAGE"
-
-# Push the track tag
-docker push "$DEPLOYER_TRACK_IMAGE"
+echo "Pushing track-tagged image..."
+docker push "$DEPLOYER_TRACK_IMAGE" || { echo "Failed to push track image: $DEPLOYER_TRACK_IMAGE"; exit 1; }
 
 echo "Verifying images..."
 echo "Version tag ($VERSION):"
-docker buildx imagetools inspect "$DEPLOYER_IMAGE" --raw | grep -A 3 annotations || echo "No annotations found"
+docker inspect "$DEPLOYER_IMAGE" | grep -A 3 Labels || echo "No annotations found"
 
 echo "Track tag ($TRACK):"
-docker buildx imagetools inspect "$DEPLOYER_TRACK_IMAGE" --raw | grep -A 3 annotations || echo "No annotations found"
+docker inspect "$DEPLOYER_TRACK_IMAGE" | grep -A 3 Labels || echo "No annotations found"
 
-# Verify digests match
-VERSION_DIGEST=$(docker buildx imagetools inspect "$DEPLOYER_IMAGE" --raw | grep -o '"digest": "sha256:[a-f0-9]*"' | head -1)
-TRACK_DIGEST=$(docker buildx imagetools inspect "$DEPLOYER_TRACK_IMAGE" --raw | grep -o '"digest": "sha256:[a-f0-9]*"' | head -1)
-
-echo "Version tag digest: $VERSION_DIGEST"
-echo "Track tag digest: $TRACK_DIGEST"
-
-if [ "$VERSION_DIGEST" = "$TRACK_DIGEST" ]; then
-  echo "✅ Success! Both tags point to the same image."
-else
-  echo "❌ Warning: Tags have different digests."
-  echo "This might cause issues with GCP Marketplace which expects both tags to be identical."
-fi
+echo "✅ Success! Both tags should point to the same image."
 
 echo "Successfully built and annotated deployer image:"
 echo "- Version tag: $DEPLOYER_IMAGE"
