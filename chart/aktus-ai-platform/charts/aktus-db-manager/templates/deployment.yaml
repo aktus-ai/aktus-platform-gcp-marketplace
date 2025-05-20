@@ -12,11 +12,12 @@ spec:
       labels:
         app: aktus-database-service
     spec:
+      terminationGracePeriodSeconds: 60
       {{- if .Values.podSecurityContext }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 10 }}
       {{- end }}
-      serviceAccountName: {{ $.Values.global.serviceAccountName }}
+      serviceAccountName: "{{ .Release.Name }}-serviceaccount"
       containers:
       - name: aktus-database-service
         {{- if .Values.containerSecurityContext }}
