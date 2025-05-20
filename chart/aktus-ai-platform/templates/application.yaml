@@ -13,11 +13,10 @@ spec:
     type: Aktus AI Platform
     version: '{{ .Chart.Version }}'
     description: |-
-      Aktus AI Platform is an enterprise AI platform that enables organizations to build and deploy
-      AI solutions for research, knowledge management, and data processing.
+      Aktus AI Platform is an AI-powered document analysis and research solution designed to extract, analyze, and query information from complex documents.
     maintainers:
     - name: Aktus AI
-      url: https://aktus.ai/
+      url: https://aktus.ai
       email: support@aktus.ai
     links:
     - description: Aktus AI
@@ -33,17 +32,39 @@ spec:
 
       ## Getting Started
 
-      1. Access the Research Service at http://EXTERNAL_IP:8080
-      2. For the inference service, use gRPC at aktus-inference:50051
+      1. Access the Research Service at http://{{ index .Values "networkSettings.researchServiceIp" }}:8080
+      2. Access the Knowledge Assistant at http://{{ index .Values "networkSettings.knowledgeAssistantIp" }}:8080
+      3. For the inference service, use gRPC at aktus-inference:50051 (internal)
+      
+      ## WebSocket Configuration
+      
+      The Knowledge Assistant service uses WebSocket connections to the Research Service for chat functionality.
+      Your deployment is configured to use:
+      - Research Service IP: {{ index .Values "networkSettings.researchServiceIp" }}
+      - Knowledge Assistant IP: {{ index .Values "networkSettings.knowledgeAssistantIp" }}
+      - WebSocket URL: ws://{{ index .Values "networkSettings.researchServiceIp" }}/chat/copilot
+      
+      ## Static IP Resources
+      
+      The deployment uses the following static IP resources:
+      - Research Service IP: {{ index .Values "networkSettings.researchServiceIp" }} (name: {{ index .Values "networkSettings.researchServiceIpName" }})
+      - Knowledge Assistant IP: {{ index .Values "networkSettings.knowledgeAssistantIp" }} (name: {{ index .Values "networkSettings.knowledgeAssistantIpName" }})
       
       ## Components
 
       The platform consists of the following services:
       - Research Service: Web interface for research and knowledge exploration
+      - Knowledge Assistant: Interactive chat interface for AI assistant
       - Inference Service: ML model inference with GPU acceleration
       - Database Service: Data management and storage
       - Multimodal Data Ingestion: Document and image processing
       - Embedding Service: Vector embeddings for semantic search
+      - Qdrant Vector Database: Fast and scalable vector similarity search
+      
+      ## GCP Service Account
+
+      The platform is using the following GCP service account for Workload Identity:
+      {{ .Values.gcpServiceAccountEmail | default "aktus-mp-test-sa@aktus-ai-platform-public.iam.gserviceaccount.com" }}
       
       ## Storage
 
@@ -99,67 +120,4 @@ spec:
     kind: ConfigMap
   - group: ""
     kind: ServiceAccount
-  info:
-  - name: Research Service (HTTP)
-    type: Reference
-    valueFrom:
-      type: ServiceRef
-      serviceRef:
-        name: aktus-research
-        port: 8080
-  - name: Database Service
-    type: Reference
-    valueFrom:
-      type: ServiceRef
-      serviceRef:
-        name: aktus-database
-        port: 80
-  - name: Inference Service (gRPC)
-    type: Reference
-    valueFrom:
-      type: ServiceRef
-      serviceRef:
-        name: aktus-inference
-        port: 50051
-  - name: PostgreSQL Server
-    type: Reference
-    valueFrom:
-      type: ServiceRef
-      serviceRef:
-        name: aktus-postgres
-        port: 5432
-  - name: Embedding Service
-    type: Reference
-    valueFrom:
-      type: ServiceRef
-      serviceRef:
-        name: aktus-embedding
-        port: 80
-  - name: Chroma Vector Database
-    type: Reference
-    valueFrom:
-      type: ServiceRef
-      serviceRef:
-        name: aktus-chroma
-        port: 80
-  - name: Redis
-    type: Reference
-    valueFrom:
-      type: ServiceRef
-      serviceRef:
-        name: aktus-redis
-        port: 6379
-  - name: RabbitMQ
-    type: Reference
-    valueFrom:
-      type: ServiceRef
-      serviceRef:
-        name: aktus-rabbitmq
-        port: 5672
-  - name: Multimodal Data Ingestion Service
-    type: Reference
-    valueFrom:
-      type: ServiceRef
-      serviceRef:
-        name: aktus-multimodal-data-ingestion
-        port: 80
+  assemblyPhase: Pending
