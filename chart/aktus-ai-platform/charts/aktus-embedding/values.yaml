@@ -14,36 +14,47 @@ aktusEmbedding:
   mdiService:
     endpoint: "http://aktus-multimodal-data-ingestion:5315"
   dbManager:
-    host: "http://aktus-database"
+    host: "http://34.68.43.151:8080"
   paths:
     extractedData: "/extracted_data"
     docUpload: "/document_upload"
     docProcessing: "/doc_processing"
-    chromaDb: "/chroma"
+    graphragData: "/graphrag_data"
       
   resources:
     requests:
-      cpu: "4000m"
-      memory: "8Gi"
-      ephemeral-storage: "5Gi"
+      cpu: "500m"
+      memory: "1Gi"
+      ephemeral-storage: "2Gi"
+    limits:
+      cpu: "1000m"
+      memory: "2Gi"
+      ephemeral-storage: "2Gi"
+  
+  livenessProbe:
+    initialDelaySeconds: 30
+    periodSeconds: 10
+  readinessProbe:
+    initialDelaySeconds: 5
+    periodSeconds: 5
   
   # GCS storage configuration
   storage:
     extractedData:
       bucketName: "aktus-platform-extracted-data"
       readOnly: false
-      mountOptions: "implicit-dirs,file-mode=0666,dir-mode=0777"
+      mountOptions: "implicit-dirs"
     docUpload:
       bucketName: "aktus-platform-doc-upload" 
       readOnly: false
-      mountOptions: "implicit-dirs,file-mode=0666,dir-mode=0777"
+      mountOptions: "implicit-dirs"
     docProcessing:
       bucketName: "aktus-platform-doc-processing"
       readOnly: false
-      mountOptions: "implicit-dirs,file-mode=0666,dir-mode=0777"
+      mountOptions: "implicit-dirs"
       
 storage:
-  chroma:
+  graphragData:
     size: "50Gi"
     storageClass: "standard"
     accessMode: "ReadWriteOnce"

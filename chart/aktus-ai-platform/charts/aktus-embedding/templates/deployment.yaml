@@ -3,6 +3,8 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: aktus-embedding
+  annotations:
+    gke-gcsfuse/volumes: "true"
 spec:
   replicas: 1
   selector:
@@ -10,11 +12,13 @@ spec:
       app: aktus-embedding-service
   template:
     metadata:
+      annotations:
+        gke-gcsfuse/volumes: "true"
       labels:
         app: aktus-embedding-service
     spec:
       terminationGracePeriodSeconds: 60
-      serviceAccountName: {{ $.Values.global.serviceAccountName }}
+      serviceAccountName: "{{ .Release.Name }}-serviceaccount"
       containers:
         - name: aktus-embedding-service
           image: "{{ .Values.aktusEmbedding.image }}"
@@ -23,8 +27,10 @@ spec:
             - containerPort: 8080
               name: http
           env:
+            - name: SUMMARIZATION_NUM_PAGES
+              value: "50"
             - name: CHUNKING_CONCURRENCY
-              value: "16"
+              value: "50"
             - name: CHUNKING_BATCH_SIZE
               value: "15"
             - name: EMBEDDING_BATCH_SIZE
@@ -54,8 +60,19 @@ spec:
               value: "{{ .Values.aktusEmbedding.paths.docUpload }}"
             - name: DB_MANAGER_HOST
               value: "{{ .Values.aktusEmbedding.dbManager.host }}"
-            - name: CHROMA_DB_DIR
-              value: "{{ .Values.aktusEmbedding.paths.chromaDb }}"
+            - name: QDRANT_URL
+              value: "http://qdrant:6333"
+            - name: VECTOR_DB_TYPE
+              value: "QDRANT"
+            - name: ENV
+              value: "dev"
+            - name: COMMUNITY_REPORT_GRAPH_PROMPT_PATH
+              value: "/app/graph/prompts/community_report_graph.txt"
+            - name: EXTRACT_CLAIMS_PROMPT_PATH
+              value: "/app/graph/prompts/extract_claims.txt"
+            - name: PROJECT_ROOT_PATH
+              value: "/graphrag_data"
+              
           volumeMounts:
             - name: extracted-data
               mountPath: "{{ .Values.aktusEmbedding.paths.extractedData }}"
@@ -63,29 +80,62 @@ spec:
               mountPath: "{{ .Values.aktusEmbedding.paths.docUpload }}"
             - name: doc-processing
               mountPath: "{{ .Values.aktusEmbedding.paths.docProcessing }}"
-            - name: chroma-db
-              mountPath: "{{ .Values.aktusEmbedding.paths.chromaDb }}"
             - name: nomic-dir
               mountPath: /root/.nomic
             - name: ephemeral
               mountPath: "/tmp"
+            - name: graphrag-data-pvc
+              mountPath: {{ .Values.aktusEmbedding.paths.graphragData }}
           resources:
+            {{- if .Values.aktusEmbedding.resources }}
+            {{- toYaml .Values.aktusEmbedding.resources | nindent 12 }}
+            {{- else }}
             requests:
-              cpu: "4000m"
-              memory: "8Gi"
+              cpu: "14000m"
+              memory: "60Gi"
               ephemeral-storage: "5Gi"
-
+            limits:
+              cpu: "14000m"
+              memory: "60Gi"
+              ephemeral-storage: "5Gi"
+            {{- end }}
       volumes:
+        {{- if .Values.global.enableGCSAccess }}
+        - name: extracted-data
+          csi:
+            driver: gcsfuse.csi.storage.gke.io
+            readOnly: false
+            volumeAttributes:
+              bucketName: {{ .Values.aktusEmbedding.storage.extractedData.bucketName | default "aktus-platform-extracted-data" | quote }}
+              mountOptions: "implicit-dirs"
+        - name: document-upload
+          csi:
+            driver: gcsfuse.csi.storage.gke.io
+            readOnly: false
+            volumeAttributes:
+              bucketName: {{ .Values.aktusEmbedding.storage.docUpload.bucketName | default "aktus-platform-doc-upload" | quote }}
+              mountOptions: "implicit-dirs"
+        - name: doc-processing
+          csi:
+            driver: gcsfuse.csi.storage.gke.io
+            readOnly: false
+            volumeAttributes:
+              bucketName: {{ .Values.aktusEmbedding.storage.docProcessing.bucketName | default "aktus-platform-doc-processing" | quote }}
+              mountOptions: "implicit-dirs"
+        {{- else }}
         - name: extracted-data
           emptyDir: {}
         - name: document-upload
           emptyDir: {}
         - name: doc-processing
           emptyDir: {}
-        - name: chroma-db
-          emptyDir: {}
+        {{- end }}
         - name: nomic-dir
           emptyDir: {}
         - name: ephemeral
           emptyDir:
             sizeLimit: 5Gi
+        - name: graphrag-data-pvc
+          persistentVolumeClaim:
+            claimName: graphrag-data-pvc
+            readOnly: false

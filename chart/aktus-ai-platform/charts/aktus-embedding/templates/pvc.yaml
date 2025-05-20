@@ -2,11 +2,11 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: chroma-pvc
+  name: graphrag-data-pvc
 spec:
   accessModes:
-    - {{ .Values.storage.chroma.accessMode | default "ReadWriteOnce" }}
+    - {{ .Values.storage.graphragData.accessMode | default "ReadWriteOnce" }}
   resources:
     requests:
-      storage: {{ .Values.storage.chroma.size }}
-  storageClassName: {{ .Values.storage.chroma.storageClass | default "standard" }}
+      storage: {{ .Values.storage.graphragData.size }}
+  storageClassName: {{ .Values.storage.graphragData.storageClass | default "standard" }}
