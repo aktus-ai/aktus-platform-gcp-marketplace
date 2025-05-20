@@ -3,8 +3,22 @@ redis:
   image: redis:7.4-alpine
   port: 6379
   persistence:
-    enabled: true
-    size: 8Gi
-    storageClass: standard-rwo
+    enabled: false  # Disable PVC by default
+    useEmptyDir: true  # Use emptyDir instead
+    size: 5Gi
+    storageClass: standard
     accessMode: ReadWriteOnce
     subPath: redis-data
+  livenessProbe:
+    initialDelaySeconds: 30
+    periodSeconds: 10
+  readinessProbe:
+    initialDelaySeconds: 5
+    periodSeconds: 5
+  resources:
+    requests:
+      cpu: "200m"
+      memory: "256Mi"
+    limits:
+      cpu: "500m"
+      memory: "512Mi"
