@@ -68,13 +68,7 @@ properties:
     type: string
     title: PostgreSQL Storage Size
     description: Size of the PostgreSQL persistent volume
-    default: 10Gi
-  
-  storage.chroma.size:
-    type: string
-    title: Vector Database Storage Size
-    description: Size of the persistent volume for the vector database
-    default: 10Gi
+    default: 50Gi
 
   # Minimal services for testing
   rabbitmq.enabled:
@@ -189,7 +183,6 @@ required:
   - aktusPostgres.password
   - aktusPostgres.database
   - aktusPostgres.persistence.size
-  - storage.chroma.size
   - rabbitmq.enabled
   - redis.enabled
   - aktus-inference-service.enabled

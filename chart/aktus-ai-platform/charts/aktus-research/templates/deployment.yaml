@@ -2,6 +2,8 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: aktus-research
+  annotations:
+    gke-gcsfuse/volumes: "true"
 spec:
   replicas: 1
   selector:
@@ -9,19 +11,22 @@ spec:
       app: aktus-research-service
   template:
     metadata:
+      annotations:
+        gke-gcsfuse/volumes: "true"
       labels:
         app: aktus-research-service
     spec:
       terminationGracePeriodSeconds: 60
       
-      serviceAccountName: {{ $.Values.global.serviceAccountName }}
+      serviceAccountName: "{{ .Release.Name }}-serviceaccount"
       containers:
         - name: aktus-research-service
           image: {{ .Values.aktusResearch.image }}
           imagePullPolicy: {{ .Values.aktusResearch.imagePullPolicy }}
           ports:
-            - containerPort: {{ .Values.aktusResearch.port }}
-              name: http
+            - name: http
+              containerPort: 8080
+              protocol: TCP
           env:
             - name: EXPERIMENTAL
               value: "true"
@@ -52,6 +57,20 @@ spec:
               value: "{{ .Values.aktusResearch.paths.extractedData }}"
             - name: ITERDRAG_ENDPOINT
               value: "http://{{ .Values.aktusResearch.embeddingService.host }}/iterdrag/"
+            - name: GRAPHRAG_ENDPOINT
+              value: "http://aktus-embedding:8080/graphrag/search"
+            - name: ENV
+              value: "dev"
+            - name: CONTEXT_PATH
+              value: /extracted_data/lease-abstraction/2025-leases/context.txt
+            - name: ENABLE_LEASE_DEMO
+              value: 'true'
+            - name: LEASE_DATA_PATH
+              value: /extracted_data
+            - name: LEASE_DATA_ABSTRACT_FOLDER
+              value: abstract
+            - name: LEASE_DATA_CASHFLOW_FOLDER
+              value: cashflow
           volumeMounts:
             - name: document-upload
               mountPath: {{ .Values.aktusResearch.paths.docUpload }}
@@ -70,9 +89,33 @@ spec:
             timeoutSeconds: {{ .Values.healthcheck.timeoutSeconds }}
             failureThreshold: {{ .Values.healthcheck.failureThreshold }}
       volumes:
+      {{- if .Values.global.enableGCSAccess }}
+        - name: document-upload
+          csi:
+            driver: gcsfuse.csi.storage.gke.io
+            readOnly: false
+            volumeAttributes:
+              bucketName: {{ .Values.aktusResearch.storage.documentUpload.bucketName }}
+              mountOptions: "{{ .Values.aktusResearch.storage.documentUpload.mountOptions }}"
+        - name: doc-processing
+          csi:
+            driver: gcsfuse.csi.storage.gke.io
+            readOnly: false
+            volumeAttributes:
+              bucketName: {{ .Values.aktusResearch.storage.docProcessing.bucketName }}
+              mountOptions: "{{ .Values.aktusResearch.storage.docProcessing.mountOptions }}"
+        - name: extracted-data
+          csi:
+            driver: gcsfuse.csi.storage.gke.io
+            readOnly: false
+            volumeAttributes:
+              bucketName: {{ .Values.aktusResearch.storage.extractedData.bucketName }}
+              mountOptions: "{{ .Values.aktusResearch.storage.extractedData.mountOptions }}"
+      {{- else }}
         - name: document-upload
           emptyDir: {}
         - name: doc-processing
           emptyDir: {}
         - name: extracted-data
           emptyDir: {}
+      {{- end }}

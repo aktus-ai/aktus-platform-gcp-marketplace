@@ -15,9 +15,12 @@ spec:
       labels:
         app: aktus-postgres-service
     spec:
-      serviceAccountName: {{ $.Values.global.serviceAccountName }}
+      terminationGracePeriodSeconds: 60
+      {{- if .Values.podSecurityContext }}
       securityContext:
-        fsGroup: 999
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      {{- end }}
+      serviceAccountName: "{{ .Release.Name }}-serviceaccount"
       containers:
         - name: postgres
           image: {{ .Values.aktusPostgres.image }}
@@ -37,7 +40,9 @@ spec:
           volumeMounts:
             - name: postgres-data
               mountPath: /var/lib/postgresql/data
+              {{- if .Values.aktusPostgres.persistence.enabled }}
               subPath: {{ .Values.aktusPostgres.persistence.subPath }}
+              {{- end }}
             - name: init-scripts
               mountPath: /docker-entrypoint-initdb.d
           livenessProbe:
@@ -79,8 +84,12 @@ spec:
             {{- toYaml .Values.aktusPostgres.resources | nindent 12 }}
       volumes:
         - name: postgres-data
+          {{- if .Values.aktusPostgres.persistence.enabled }}
           persistentVolumeClaim:
             claimName: {{ .Release.Name }}-postgres-data
+          {{- else }}
+          emptyDir: {}
+          {{- end }}
         - name: init-scripts
           configMap:
             name: {{ .Values.aktusPostgres.initScripts.configMap }}

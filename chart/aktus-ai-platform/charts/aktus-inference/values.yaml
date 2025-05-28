@@ -48,6 +48,12 @@ aktusInference:
   
   resources:
     requests:
-      cpu: "20000m"
-      memory: "140Gi"
-      nvidia.com/gpu: 2
+      cpu: "10000m"
+      memory: "72Gi"
+      nvidia.com/gpu: 1
+      ephemeral-storage: "5Gi"
+    limits:
+      cpu: "10000m"
+      memory: "72Gi"
+      nvidia.com/gpu: 1
+      ephemeral-storage: "5Gi"

@@ -5,24 +5,25 @@ x-google-marketplace:
   applicationApiVersion: v1beta1
   publishedVersion: "1.0.0"
   publishedVersionMetadata:
-    releaseNote: >-
-      Initial release of Aktus AI Platform.
-  clusterConstraints:
-    resources:
-    # GPU constraint removed as inference is disabled by default for testing
-    # - requests: # Entry for GPU resources
-    #     gpu:
-    #       nvidia.com/gpu:
-    #         limits: 1 # Match deployment request (any Nvidia GPU)
-    #         # Removed specific platforms constraint to allow any compatible GPU
-    - replicas: 2  # Entry for non-GPU resources
-      requests:
-        cpu: 6000m
-        memory: 24Gi
-
-  # Service account configuration
+    releaseNote: Initial release of Aktus AI Platform.
   managedUpdates:
     kalmSupported: false
+  # clusterConstraints:
+  #   resources:
+  #   - replicas: 2  # Entry for non-GPU resources
+  #     requests:
+  #       cpu: 28000m  # Increased from 6000m to accommodate MDI's 16 cores + other services
+  #       memory: 80Gi  # Increased from 24Gi to accommodate MDI's 64Gi + other services
+  #   - requests:  # Entry for GPU resources
+  #       gpu:
+  #         nvidia.com/gpu:
+  #           limits: 1
+  #           platforms:
+  #           - nvidia-tesla-t4
+  #           - nvidia-tesla-v100
+  #           - nvidia-tesla-p100
+  #           - nvidia-tesla-p4
+  #           - nvidia-tesla-a100
   images:
     aktus-inference:
       properties:
@@ -49,29 +50,118 @@ x-google-marketplace:
         aktus-embedding-service.aktusEmbedding.image:
           type: FULL
           default: gcr.io/aktus-ai-platform-public/aktus-platform-marketplace/aktus-embedding:1.0.0
-  # billable:
-  #   enabled: true
-  #   costStructure:
-  #     basePrice:
-  #       name: Per Node
-  #       description: Base price per node per month
-  #       priceInUsd: 200
-  #     additionalItems:
-  #       - name: Inference Compute
-  #         description: Price per hour of inference computation
-  #         priceInUsd: 5.00
-  #         unitOfMeasure: hour
-  #         unitQuantityMultiplier: 0.0002777778 # Converts seconds to hours
-  #         displayQuantityUnit: hour
-  #         displayQuantityBase: 3600 # 1 hour = 3600 seconds
-  #         displayQuantityMultiplier: 0.0002777778 # 1/3600
-  #         stockUnit: second
-  #         stockUnitMultiplier: 1
-  #         stockUnitConverterToDisplayQuantity: 0.0002777778 # 1/3600
-  #         reportingGranularity: DAILY
-  #         metricName: aktus_inference_time_seconds
+    aktus-knowledge-assistant:
+      properties:
+        aktus-knowledge-assistant-service.aktusKnowledgeAssistant.image:
+          type: FULL
+          default: gcr.io/aktus-ai-platform-public/aktus-platform-marketplace/aktus-knowledge-assistant:1.0.0
+
+form:
+- widget: help
+  description: >
+    <div style="font-family: 'Google Sans', Arial, sans-serif; max-width: 850px; margin: 0 auto; padding: 24px; border-radius: 12px; background: #fff; box-shadow: 0 2px 10px rgba(0,0,0,0.08); color: #202124;">
+      <h1 style="color: #1a73e8; margin-top: 0; font-weight: 500; font-size: 28px; text-align: center; margin-bottom: 28px;">Aktus AI Platform Deployment</h1>
+      
+      <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 24px; border-left: 5px solid #1a73e8;">
+        <h2 style="margin-top: 0; font-weight: 500; color: #1a73e8; font-size: 20px;">⚠️ Prerequisites</h2>
+        <p style="margin-top: 12px; line-height: 1.5;">Complete these steps <strong>before</strong> deploying the application:</p>
+        
+        <div style="background: #fff; padding: 16px; border-radius: 8px; margin-top: 16px; border: 1px solid #dadce0;">
+          <h3 style="margin-top: 0; font-weight: 500; color: #202124; font-size: 16px;">1. Create a GKE Cluster with Required Resources</h3>
+          <ul style="margin-bottom: 0; padding-left: 24px; line-height: 1.6;">
+            <li>3 nodes with <code style="background: #f1f3f4; padding: 2px 6px; border-radius: 4px; font-size: 14px;">e2-standard-16</code> for general workloads</li>
+            <li>1 node with <code style="background: #f1f3f4; padding: 2px 6px; border-radius: 4px; font-size: 14px;">NVIDIA A100 40GB</code> GPU for ML inference</li>
+          </ul>
+        </div>
+        
+        <div style="background: #fff; padding: 16px; border-radius: 8px; margin-top: 16px; border: 1px solid #dadce0;">
+          <h3 style="margin-top: 0; font-weight: 500; color: #202124; font-size: 16px;">2. Enable the GCS Fuse CSI Driver</h3>
+          <div style="background: #f1f3f4; padding: 12px; border-radius: 6px; margin-top: 10px; overflow-x: auto; font-family: 'Roboto Mono', monospace; font-size: 14px;">
+            <pre style="margin: 0;">gcloud container clusters update cluster-test-gpu-a100 \
+    --update-addons GcsFuseCsiDriver=ENABLED \
+    --location=us-central1</pre>
+          </div>
+        </div>
+        
+        <div style="background: #fff; padding: 16px; border-radius: 8px; margin-top: 16px; border: 1px solid #dadce0;">
+          <h3 style="margin-top: 0; font-weight: 500; color: #202124; font-size: 16px;">3. Update Node Pools with GKE Metadata</h3>
+          <div style="background: #f1f3f4; padding: 12px; border-radius: 6px; margin-top: 10px; overflow-x: auto; font-family: 'Roboto Mono', monospace; font-size: 14px;">
+            <pre style="margin: 0;">gcloud container node-pools update default-pool \
+    --cluster=cluster-test-gpu-a100 \
+    --zone=us-central1 \
+    --workload-metadata=GKE_METADATA</pre>
+          </div>
+          <p style="margin-top: 12px; font-size: 14px; color: #5f6368;"><strong>Note:</strong> Repeat this command for any other node pools in your cluster.</p>
+        </div>
+        
+        <div style="background: #fff; padding: 16px; border-radius: 8px; margin-top: 16px; border: 1px solid #dadce0;">
+          <h3 style="margin-top: 0; font-weight: 500; color: #202124; font-size: 16px;">4. Bind Service Account to GCS (After Deployment)</h3>
+          <div style="background: #f1f3f4; padding: 12px; border-radius: 6px; margin-top: 10px; overflow-x: auto; font-family: 'Roboto Mono', monospace; font-size: 14px;">
+            <pre style="margin: 0;">gcloud iam service-accounts add-iam-policy-binding \
+    aktus-mp-test-sa@aktus-ai-platform-public.iam.gserviceaccount.com \
+    --role="roles/iam.workloadIdentityUser" \
+    --member="principal://iam.googleapis.com/projects/136049965899/locations/global/workloadIdentityPools/aktus-ai-platform-public.svc.id.goog/subject/ns/aktus-ai/sa/aktus-ai-platform-marketplace-serviceaccount"</pre>
+          </div>
+          <div style="background: #f1f3f4; padding: 12px; border-radius: 6px; margin-top: 12px; overflow-x: auto; font-family: 'Roboto Mono', monospace; font-size: 14px;">
+            <pre style="margin: 0;">gcloud projects add-iam-policy-binding aktus-ai-platform-public \
+    --member "principal://iam.googleapis.com/projects/136049965899/locations/global/workloadIdentityPools/aktus-ai-platform-public.svc.id.goog/subject/ns/aktus-ai/sa/aktus-ai-platform-marketplace-serviceaccount" \
+    --role "roles/storage.objectUser"</pre>
+          </div>
+        </div>
+      </div>
+      
+      <div style="background: #e8f0fe; padding: 20px; border-radius: 8px; margin-bottom: 24px; border-left: 5px solid #4285f4;">
+        <h2 style="margin-top: 0; font-weight: 500; color: #1967d2; font-size: 20px;">🖥️ Hardware Requirements</h2>
+        <div style="display: flex; flex-wrap: wrap; gap: 16px; margin-top: 16px;">
+          <div style="flex: 1; min-width: 300px; background: #fff; padding: 16px; border-radius: 8px; border: 1px solid #dadce0;">
+            <h3 style="margin-top: 0; font-weight: 500; color: #202124; font-size: 16px;">Standard Workloads</h3>
+            <ul style="margin-bottom: 0; padding-left: 24px; line-height: 1.6;">
+              <li><strong>CPU:</strong> 3x e2-standard-16 (48 vCPUs total)</li>
+              <li><strong>Memory:</strong> 3x 64GB (192GB total)</li>
+              <li><strong>Storage:</strong> 200GB minimum</li>
+            </ul>
+          </div>
+          <div style="flex: 1; min-width: 300px; background: #fff; padding: 16px; border-radius: 8px; border: 1px solid #dadce0;">
+            <h3 style="margin-top: 0; font-weight: 500; color: #202124; font-size: 16px;">GPU Workloads</h3>
+            <ul style="margin-bottom: 0; padding-left: 24px; line-height: 1.6;">
+              <li><strong>GPU:</strong> 1x NVIDIA A100 (40GB)</li>
+              <li><strong>Drivers:</strong> Latest NVIDIA drivers required</li>
+              <li><strong>GKE Version:</strong> 1.24 or later</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      
+      <div style="background: #fef7e0; padding: 20px; border-radius: 8px; margin-bottom: 24px; border-left: 5px solid #fbbc04;">
+        <h2 style="margin-top: 0; font-weight: 500; color: #b06000; font-size: 20px;">💾 Storage Configuration</h2>
+        <p style="margin-top: 12px; line-height: 1.5;">The application requires access to these GCS buckets:</p>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px; margin-top: 16px;">
+          <div style="background: #fff; padding: 12px; border-radius: 8px; border: 1px solid #dadce0;">
+            <code style="color: #188038; font-weight: 500;">gs://aktus-platform-models</code>
+            <p style="margin: 8px 0 0; font-size: 14px; color: #5f6368;">ML models and artifacts</p>
+          </div>
+          <div style="background: #fff; padding: 12px; border-radius: 8px; border: 1px solid #dadce0;">
+            <code style="color: #188038; font-weight: 500;">gs://aktus-platform-doc-upload</code>
+            <p style="margin: 8px 0 0; font-size: 14px; color: #5f6368;">Document uploads</p>
+          </div>
+          <div style="background: #fff; padding: 12px; border-radius: 8px; border: 1px solid #dadce0;">
+            <code style="color: #188038; font-weight: 500;">gs://aktus-platform-doc-processing</code>
+            <p style="margin: 8px 0 0; font-size: 14px; color: #5f6368;">Intermediate processing files</p>
+          </div>
+          <div style="background: #fff; padding: 12px; border-radius: 8px; border: 1px solid #dadce0;">
+            <code style="color: #188038; font-weight: 500;">gs://aktus-platform-extracted-data</code>
+            <p style="margin: 8px 0 0; font-size: 14px; color: #5f6368;">Processed document data</p>
+          </div>
+        </div>
+      </div>
+      
+      <div style="text-align: center; margin-top: 8px;">
+        <p style="color: #5f6368; font-size: 14px;">For more information, see the <a href="https://cloud.google.com/kubernetes-engine/docs/how-to/persistent-volumes/cloud-storage-fuse-csi-driver" style="color: #1a73e8; text-decoration: none; font-weight: 500;">GCS Fuse CSI Driver documentation</a></p>
+      </div>
+    </div>
 
 properties:
+  # Basic Configuration
   name:
     type: string
     x-google-marketplace:
@@ -87,9 +177,7 @@ properties:
     x-google-marketplace:
       type: SERVICE_ACCOUNT
       serviceAccount:
-        description: >
-          GCP service account for the application. Needs permissions to manage secrets, configmaps, PVCs (Role provided below).
-          IMPORTANT: This service account, via Workload Identity, also requires GCP IAM roles to access GCS buckets used by the application (e.g., models, document upload/processing, extracted data). Grant the 'Storage Object Admin' (`roles/storage.objectAdmin`) role or a custom role with equivalent permissions (`storage.objects.list`, `storage.objects.get`, `storage.objects.create`, `storage.objects.delete`) on the project or relevant buckets to the Google Service Account used during deployment.
+        description: GCP service account for the application. Needs permissions to manage secrets, configmaps, PVCs. This service account also requires GCS bucket access permissions.
         roles:
           - type: Role
             rulesType: CUSTOM
@@ -98,128 +186,158 @@ properties:
                 resources: ["secrets", "configmaps", "persistentvolumeclaims"]
                 verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
   
-  # Database configurations
-  aktusPostgres.username:
+  # Network Configuration
+  global.networkSettings.researchServiceIp:
     type: string
-    title: PostgreSQL Username
-    description: Username for PostgreSQL database
-    default: root
+    title: Research Service Static IP
+    description: "Static IP address for the Research Service (WebSocket backend). Must be in the same region as your GKE cluster."
+    default: ""
   
-  aktusPostgres.password:
+  global.networkSettings.databaseServiceIp:
     type: string
-    title: PostgreSQL Password
-    description: Password for PostgreSQL database
-    x-google-marketplace:
-      type: GENERATED_PASSWORD
-      generatedPassword:
-        length: 16
-        includeSymbols: false
-        base64: false
-  
-  aktusPostgres.database:
+    title: Database Service Static IP
+    description: "Static IP address for the Database Service. Must be in the same region as your GKE cluster."
+    default: ""
+
+  global.networkSettings.embeddingServiceIp:
     type: string
-    title: PostgreSQL Database
-    description: Name of the PostgreSQL database
-    default: root
-  
-  # Storage configurations
-  aktusPostgres.persistence.size:
+    title: Embedding Service Static IP
+    description: "Static IP address for the Embedding Service. Must be in the same region as your GKE cluster."
+    default: ""
+
+  global.networkSettings.knowledgeAssistantIp:
     type: string
-    title: PostgreSQL Storage Size
-    description: Size of the PostgreSQL persistent volume
-    default: 10Gi
+    title: Knowledge Assistant Static IP
+    description: "Static IP address for the Knowledge Assistant frontend. Must be in the same region as your GKE cluster."
+    default: ""
   
-  storage.chroma.size:
+  # Identity & Access
+  gcpServiceAccountEmail:
     type: string
-    title: Vector Database Storage Size
-    description: Size of the persistent volume for the vector database
-    default: 10Gi
+    title: GCP Service Account Email
+    description: "Email of the GCP service account for workload identity (e.g., my-sa@my-project.iam.gserviceaccount.com)"
+    default: "aktus-mp-test-sa@aktus-ai-platform-public.iam.gserviceaccount.com"
   
-  # Service configurations
+  # # Database configurations
+  # aktusPostgres.username:
+  #   type: string
+  #   title: PostgreSQL Username
+  #   description: Username for PostgreSQL database
+  #   default: root
+  
+  # aktusPostgres.password:
+  #   type: string
+  #   title: PostgreSQL Password
+  #   description: Password for PostgreSQL database
+  #   x-google-marketplace:
+  #     type: GENERATED_PASSWORD
+  #     generatedPassword:
+  #       length: 16
+  #       includeSymbols: false
+  #       base64: false
+  
+  # aktusPostgres.database:
+  #   type: string
+  #   title: PostgreSQL Database
+  #   description: Name of the PostgreSQL database
+  #   default: root
+  
+  # # Storage configurations
+  # aktusPostgres.persistence.size:
+  #   type: string
+  #   title: PostgreSQL Storage Size
+  #   description: Size of the PostgreSQL persistent volume
+  #   default: 10Gi
+  
+  # storage.graphragData.size:
+  #   type: string
+  #   title: Vector Database Storage Size
+  #   description: Size of the persistent volume for the vector database
+  #   default: 1Gi
+  
+  # Service Configuration
   aktus-inference-service.enabled:
     type: boolean
     title: Enable Inference Service
     description: Enable the model inference service
-    default: true
+    default: false
   
   aktus-multimodal-data-ingestion-service.enabled:
     type: boolean
     title: Enable Multimodal Data Ingestion
     description: Enable the multimodal data ingestion service
-    default: true
+    default: false
   
   aktus-embedding-service.enabled:
     type: boolean
     title: Enable Embedding Service
     description: Enable the vector embedding service
-    default: true
+    default: false
   
-  aktus-database-service.enabled:
-    type: boolean
-    title: Enable Database Service
-    description: Enable the database manager service
-    default: true
+  # aktus-database-service.enabled:
+  #   type: boolean
+  #   title: Enable Database Service
+  #   description: Enable the database manager service
+  #   default: true
   
   aktus-research-service.enabled:
     type: boolean
     title: Enable Research Service
     description: Enable the research service
-    default: true
+    default: false
 
-  # GCS storage bucket configurations
+  # aktus-knowledge-assistant-service.enabled:
+  #   type: boolean
+  #   title: Enable Knowledge Assistant
+  #   description: Enable the knowledge assistant service for interactive chat
+  #   default: true
+
+  # # Qdrant vector database
+  qdrant-service.enabled:
+    type: boolean
+    title: Enable Qdrant Vector Database
+    description: Enable the Qdrant vector database service
+    default: false
+    
+  # GCS Access Control
+  enableGCSAccess:
+    type: boolean
+    title: Enable GCS Bucket Access
+    description: "Enable access to GCS buckets. Set to false by default. After deployment, bind the service account to the GCP service account with Workload Identity."
+    default: true
+    
+  # storage.qdrant.size:
+  #   type: string
+  #   title: Qdrant Storage Size
+  #   description: Size of the persistent volume for the Qdrant vector database
+  #   default: 1Gi
+
+  # Storage Configuration
   aktusInference.storage.models.bucketName:
     type: string
     title: Models Storage Bucket
     description: GCS bucket name for storing ML models
-    default: aktus-models
+    default: aktus-platform-models
   
   aktusInference.storage.docUpload.bucketName:
     type: string
     title: Document Upload Bucket
     description: GCS bucket name for document uploads
-    default: aktus-ai-platform-doc-upload
+    default: aktus-platform-doc-upload
   
   aktusInference.storage.docProcessing.bucketName:
     type: string
     title: Document Processing Bucket
     description: GCS bucket name for document processing
-    default: aktus-ai-platform-doc-proc
+    default: aktus-platform-doc-processing
     
   aktusInference.storage.extractedData.bucketName:
     type: string
     title: Extracted Data Bucket
     description: GCS bucket name for extracted document data
-    default: aktus-ai-platform-ext-data
+    default: aktus-platform-extracted-data
 
-  # Billing Configuration
-  billing.enabled:
-    type: boolean
-    title: Enable Usage-Based Billing
-    description: Enable tracking and reporting of usage metrics
-    default: true
-
-  billing.reportingSecret:
-    type: string
-    title: GCP Service Account Key for Billing
-    description: Base64-encoded Google Cloud service account key for reporting usage metrics
-    default: "ewogICJ0eXBlIjogInNlcnZpY2VfYWNjb3VudCIsCiAgInByb2plY3RfaWQiOiAiYWt0dXMtYWktcGxhdGZvcm0tcHVibGljIiwKICAicHJpdmF0ZV9rZXlfaWQiOiAidGVzdC1rZXktaWQiLAogICJwcml2YXRlX2tleSI6ICItLS0tLUJFR0lOIFBSSVZBVEUgS0VZLS0tLS1cbnRlc3Qta2V5XG4tLS0tLUVORCBQUklWQVRFIEtFWS0tLS0tIiwKICAiY2xpZW50X2VtYWlsIjogInRlc3RAYWt0dXMtYWktcGxhdGZvcm0tcHVibGljLmlhbS5nc2VydmljZWFjY291bnQuY29tIiwKICAiY2xpZW50X2lkIjogInRlc3QtaWQiLAogICJhdXRoX3VyaSI6ICJodHRwczovL2FjY291bnRzLmdvb2dsZS5jb20vby9vYXV0aDIvYXV0aCIsCiAgInRva2VuX3VyaSI6ICJodHRwczovL29hdXRoMi5nb29nbGVhcGlzLmNvbS90b2tlbiIsCiAgImF1dGhfcHJvdmlkZXJfeDUwOV9jZXJ0X3VybCI6ICJodHRwczovL3d3dy5nb29nbGVhcGlzLmNvbS9vYXV0aDIvdjEvY2VydHMiLAogICJjbGllbnRfeDUwOV9jZXJ0X3VybCI6ICJodHRwczovL3d3dy5nb29nbGVhcGlzLmNvbS9yb2JvdC92MS9tZXRhZGF0YS94NTA5L3Rlc3RAYWt0dXMtYWktcGxhdGZvcm0tcHVibGljLmlhbS5nc2VydmljZWFjY291bnQuY29tIgp9"
-    x-google-marketplace:
-      type: STRING
-      
-  billing.serviceName:
-    type: string
-    title: Billing Service Name
-    description: Service name for usage tracking
-    default: aktus-ai-platform.endpoints.aktus-ai-platform-public.cloud.goog
-    
-  billing.consumerId:
-    type: string
-    title: Billing Consumer ID
-    description: Consumer ID for usage tracking (must start with 'project:')
-    default: project:aktus-ai-platform-public
-    pattern: ^project:.*$
-
-  # API keys for external services
+  # API Keys
   secrets.openaiApiKey:
     type: string
     title: OpenAI API Key
@@ -239,15 +357,10 @@ properties:
 required:
   - name
   - namespace
-  - storage.chroma.size
-  - aktus-database-service.enabled
-  - aktus-research-service.enabled
-  - aktus-inference-service.enabled
-  - aktus-multimodal-data-ingestion-service.enabled
-  - aktus-embedding-service.enabled
-  - billing.enabled
-  - billing.reportingSecret
-  - billing.serviceName
-  - billing.consumerId
   - secrets.openaiApiKey
   - secrets.huggingfaceLoginKey
+  - gcpServiceAccountEmail
+  - global.networkSettings.researchServiceIp
+  - global.networkSettings.databaseServiceIp
+  - global.networkSettings.embeddingServiceIp
+  - global.networkSettings.knowledgeAssistantIp

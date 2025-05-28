@@ -23,27 +23,28 @@ spec:
           volumeMounts:
             - name: redis-data
               mountPath: /data
+              {{- if .Values.redis.persistence.enabled }}
               subPath: {{ .Values.redis.persistence.subPath }}
+              {{- end }}
           livenessProbe:
             tcpSocket:
               port: redis
-            initialDelaySeconds: 30
-            periodSeconds: 10
+            initialDelaySeconds: {{ .Values.redis.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.redis.livenessProbe.periodSeconds }}
           readinessProbe:
             exec:
               command:
                 - redis-cli
                 - ping
-            initialDelaySeconds: 5
-            periodSeconds: 5
+            initialDelaySeconds: {{ .Values.redis.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.redis.readinessProbe.periodSeconds }}
           resources:
-            requests:
-              cpu: "500m"
-              memory: "1Gi"
-            limits:
-              cpu: "1000m"
-              memory: "2Gi"
+            {{- toYaml .Values.redis.resources | nindent 12 }}
       volumes:
         - name: redis-data
+          {{- if .Values.redis.persistence.enabled }}
           persistentVolumeClaim:
             claimName: {{ .Release.Name }}-redis-data
+          {{- else }}
+          emptyDir: {}
+          {{- end }}

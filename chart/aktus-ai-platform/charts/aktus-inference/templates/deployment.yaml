@@ -3,23 +3,41 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: aktus-inference
+  annotations:
+    gke-gcsfuse/volumes: "true"
 spec:
-  replicas: 1
+  replicas: {{ .Values.global.aktusInference.replicas | default 1 }}
   selector:
     matchLabels:
       app: aktus-inference-service
   template:
     metadata:
+      annotations:
+        kubernetes.io/gpu-accelerator: "true"
+        gke-gcsfuse/volumes: "true"
+        gke-gcsfuse/ephemeral-storage-limit: "5Gi"
       labels:
         app: aktus-inference-service
     spec:
+      nodeSelector:
+        kubernetes.io/arch: amd64
+        cloud.google.com/gke-accelerator: nvidia-tesla-a100
+      tolerations:
+      - key: nvidia.com/gpu
+        operator: Exists
+        effect: NoSchedule
+      - effect: NoSchedule
+        key: kubernetes.io/arch
+        operator: Equal
+        value: amd64
       terminationGracePeriodSeconds: 60
+      serviceAccountName: "{{ .Release.Name }}-serviceaccount"
       containers:
         - name: aktus-inference-service
-          image: "{{ .Values.aktusInference.image }}"
-          imagePullPolicy: "Always"
+          image: {{ .Values.aktusInference.image }}
+          imagePullPolicy: {{ .Values.aktusInference.imagePullPolicy | default "Always" }}
           ports:
-            - containerPort: 50051
+            - containerPort: {{ .Values.aktusInference.grpcPort | default 50051 }}
               name: grpc
           env:
             - name: HF_LOGIN_KEY
@@ -38,46 +56,59 @@ spec:
             - name: YOLO_LAYOUT_PARSER_DEFAULT_MODEL_PATH
               value: "{{ .Values.aktusInference.modelConfig.yolo.modelPath }}"
             - name: SERVER_URI
-              value: "{{ .Values.aktusInference.serverConfig.uri }}"
+              value: {{ .Values.aktusInference.serverConfig.uri | quote }}
             - name: ENABLE_FLASH_ATTENTION
-              value: "false"
+              value: {{ .Values.aktusInference.serverConfig.enableFlashAttention | quote }}
             - name: HF_LOCAL_FILES_ONLY
-              value: "{{ .Values.aktusInference.serverConfig.hfLocalFilesOnly }}"
+              value: {{ .Values.aktusInference.serverConfig.hfLocalFilesOnly | quote }}
             - name: DEFAULT_DEVICE
-              value: "cpu"
-            - name: SERVICE_PORT
-              value: "{{ .Values.aktusInference.grpcPort }}"
-            {{- if $.Values.global.billing.enabled }}
-            - name: KUBERNETES_NAMESPACE
-              valueFrom:
-                fieldRef:
-                  fieldPath: metadata.namespace
-            - name: RELEASE_NAME
-              value: {{ $.Release.Name | quote }}
-            {{- end }}
+              value: "{{ .Values.aktusInference.serverConfig.defaultDevice }}"
+            - name: NVIDIA_VISIBLE_DEVICES
+              value: "all"
+            - name: CUDA_VISIBLE_DEVICES
+              value: "0"
           volumeMounts:
             - name: models-data
-              mountPath: "{{ .Values.aktusInference.paths.models }}"
+              mountPath: {{ .Values.aktusInference.paths.models }}
             - name: document-upload
-              mountPath: "{{ .Values.aktusInference.paths.docUpload }}"
+              mountPath: {{ .Values.aktusInference.paths.docUpload }}
             - name: doc-processing
-              mountPath: "{{ .Values.aktusInference.paths.docProcessing }}"
-            {{- if $.Values.global.billing.enabled }}
-            - name: billing-helper
-              mountPath: /usr/local/lib/python3.8/site-packages/billing_metrics.py
-              subPath: billing_metrics.py
-            {{- end }}
-      serviceAccountName: {{ $.Values.global.serviceAccountName }}
+              mountPath: {{ .Values.aktusInference.paths.docProcessing }}
+            - name: ephemeral
+              mountPath: "/tmp"
+          resources:
+            requests:
+              nvidia.com/gpu: "1"
+              cpu: "4000m"
+              memory: "16Gi"
+              ephemeral-storage: "5Gi"
+            limits:
+              nvidia.com/gpu: "1"
+              cpu: "8000m"
+              memory: "32Gi"
+              ephemeral-storage: "5Gi"
       volumes:
         - name: models-data
-          emptyDir: {}
+          csi:
+            driver: gcsfuse.csi.storage.gke.io
+            readOnly: {{ .Values.aktusInference.storage.models.readOnly }}
+            volumeAttributes:
+              bucketName: {{ .Values.aktusInference.storage.models.bucketName }}
+              mountOptions: "{{ .Values.aktusInference.storage.models.mountOptions }}"
         - name: document-upload
-          emptyDir: {}
+          csi:
+            driver: gcsfuse.csi.storage.gke.io
+            readOnly: {{ .Values.aktusInference.storage.docUpload.readOnly }}
+            volumeAttributes:
+              bucketName: {{ .Values.aktusInference.storage.docUpload.bucketName }}
+              mountOptions: "{{ .Values.aktusInference.storage.docUpload.mountOptions }}"
         - name: doc-processing
-          emptyDir: {}
-        {{- if $.Values.global.billing.enabled }}
-        - name: billing-helper
-          configMap:
-            name: {{ $.Release.Name }}-billing-helper
-            defaultMode: 0755
-        {{- end }}
+          csi:
+            driver: gcsfuse.csi.storage.gke.io
+            readOnly: {{ .Values.aktusInference.storage.docProcessing.readOnly }}
+            volumeAttributes:
+              bucketName: {{ .Values.aktusInference.storage.docProcessing.bucketName }}
+              mountOptions: "{{ .Values.aktusInference.storage.docProcessing.mountOptions }}"
+        - name: ephemeral
+          emptyDir:
+            sizeLimit: 5Gi

@@ -7,38 +7,60 @@ rabbitmq:
     password: guest
     port: 5672
     vhost: "/"
+    persistence:
+      enabled: false
+      useEmptyDir: true
+      size: 8Gi
+    resources:
+      requests:
+        cpu: 500m
+        memory: 512Mi
+      limits:
+        cpu: 1000m
+        memory: 1Gi
+    readinessProbe:
+      exec:
+        command:
+          - rabbitmq-diagnostics
+          - check_port_connectivity
+      initialDelaySeconds: 30
+      periodSeconds: 10
+      timeoutSeconds: 5
+      failureThreshold: 3
 
 redis:
   enabled: true
   redis:
     image: docker.io/library/redis:7.2-alpine
     persistence:
-      enabled: true
-      size: 50Gi
-      storageClass: standard-rwo
-      accessMode: ReadWriteOnce
+      enabled: false
+      useEmptyDir: true
+      size: 8Gi
 
 serviceAccount:
-  name: "aktus-service-account"
+  name: "${RELEASE_NAME}-serviceaccount"
 
 # Global values passed to all subcharts
 global:
-  serviceAccountName: "aktus-service-account"
+  serviceAccountName: "${RELEASE_NAME}-serviceaccount"
   billing:
     enabled: true
     reportingEndpoint: "billing:8090/report"
-
-# Billing configuration
-billing:
-  enabled: true
-  reportingSecret: ""
-  serviceName: "aktus-ai-platform"
-  consumerId: "project:aktus-ai-platform-public"
+  # Pass network settings to subcharts
+  networkSettings:
+    researchServiceIp: ""
+    knowledgeAssistantIp: ""
+    databaseServiceIp: ""
+    embeddingServiceIp: ""
+  # Enable or disable GCS bucket access
+  enableGCSAccess: true
+  aktusInference:
+    replicas: 0
 
 # Core Services
 aktus-database-service:
   enabled: true
-  serviceAccount: "{{ .Values.serviceAccount.name }}"
+  serviceAccount: "${RELEASE_NAME}-serviceaccount"
   aktusDatabase:
     image: us-docker.pkg.dev/aktus-ai-platform-public/aktus-platform-marketplace/aktus-db-manager:v1.0.0
     dbConfig:
@@ -47,50 +69,118 @@ aktus-database-service:
       host: aktus-postgres
       port: 5432
       dbName: "root"
+    serviceAccount:
+      name: "${RELEASE_NAME}-serviceaccount"
 
 aktus-inference-service:
   enabled: true
   aktusInference:
     image: us-docker.pkg.dev/aktus-ai-platform-public/aktus-platform-marketplace/aktus-inference:v1.0.0
-    serviceAccount:
-      name: "{{ .Values.serviceAccount.name }}"
-    nodeSelector:
+    imagePullPolicy: Always
+    serviceAccount: "${RELEASE_NAME}-serviceaccount"
+    nodeSelector: 
       cloud.google.com/gke-accelerator: nvidia-tesla-a100
-    resources:
-      requests:
-        nvidia.com/gpu: 1
-      limits:
-        nvidia.com/gpu: 1
+    tolerations:
+      - key: nvidia.com/gpu
+        operator: Exists
+        effect: NoSchedule
+    grpcPort: 50051
+    serverConfig:
+      uri: "[::]:50051"
+      enableFlashAttention: 0
+      hfLocalFilesOnly: 1
+      defaultDevice: "cuda"
+    modelConfig:
+      minicpm:
+        baseModelPath: "/models/minicpm/production/"
+        peftModelPath: "/models/minicpm/production/"
+        processorPath: "/models/minicpm/production/"
+      yolo:
+        modelPath: "/models/yolo/roboflow_yolo-v1/roboflow_yolo_weights_v1.pt"
+    paths:
+      models: "/models"
+      docUpload: "/document_upload"
+      docProcessing: "/doc_processing"
     storage:
       models:
         bucketName: "aktus-platform-models"
+        readOnly: false
+        mountOptions: "implicit-dirs,file-mode=0666,dir-mode=0777"
       docUpload:
         bucketName: "aktus-platform-doc-upload"
+        readOnly: false
+        mountOptions: "implicit-dirs,file-mode=0666,dir-mode=0777"
       docProcessing:
         bucketName: "aktus-platform-doc-processing"
+        readOnly: false
+        mountOptions: "implicit-dirs,file-mode=0666,dir-mode=0777"
+      extractedData:
+        bucketName: "aktus-platform-extracted-data"
+        readOnly: false
+        mountOptions: "implicit-dirs,file-mode=0666,dir-mode=0777"
+    resources:
+      requests:
+        cpu: "1000" #"4000m"
+        memory: "4Gi" #"16Gi"
+        nvidia.com/gpu: 1
+        ephemeral-storage: "5Gi"
+      limits:
+        cpu: "10000" #"8000m"
+        memory: "72Gi" #"32Gi"
+        nvidia.com/gpu: 1
+        ephemeral-storage: "5Gi"
+
+# Network configuration is now in the global section
+# networkSettings.researchServiceIp: ""
+# networkSettings.knowledgeAssistantIp: ""
 
 # Application Services
 aktus-research-service:
   enabled: true
   serviceAccount:
-    name: "{{ .Values.serviceAccount.name }}"
+    name: "${RELEASE_NAME}-serviceaccount"
   aktusResearch:
     image: us-docker.pkg.dev/aktus-ai-platform-public/aktus-platform-marketplace/aktus-research:v1.0.0
+    service:
+      type: ClusterIP
+      port: 8080
     modelInference:
       address: "aktus-inference:50051"
+    resources:
+      requests:
+        cpu: "1000m"
+        memory: "4Gi"
+      limits:
+        cpu: "4000m"
+        memory: "16Gi"
     storage:
       documentUpload:
         bucketName: "aktus-platform-doc-upload"
+        readOnly: false
+        mountOptions: "implicit-dirs,file-mode=0666,dir-mode=0777"
       docProcessing:
         bucketName: "aktus-platform-doc-processing"
+        readOnly: false
+        mountOptions: "implicit-dirs,file-mode=0666,dir-mode=0777"
       extractedData:
         bucketName: "aktus-platform-extracted-data"
+        readOnly: false
+        mountOptions: "implicit-dirs,file-mode=0666,dir-mode=0777"
 
 aktus-multimodal-data-ingestion-service:
   enabled: true
   aktusMdi:
-    image: us-docker.pkg.dev/aktus-ai-platform-public/aktus-platform-marketplace/aktus-multimodal-data-ingestion:v1.0.0
-    serviceAccount: "{{ .Values.serviceAccount.name }}"
+    image: us-central1-docker.pkg.dev/aktus-393100/zach-dev/service-ocr-graphrag-integration
+    serviceAccount: "${RELEASE_NAME}-serviceaccount"
+    resources:
+      requests:
+        cpu: "1000m"
+        memory: "4Gi"
+        ephemeral-storage: 5Gi
+      limits:
+        cpu: "16000m"
+        memory: "64Gi"
+        ephemeral-storage: 5Gi
     rabbitmq:
       host: "rabbitmq"
       port: "5672"
@@ -102,7 +192,7 @@ aktus-multimodal-data-ingestion-service:
     modelInference:
       host: "aktus-inference:50051"
     vectorEmbedding:
-      host: "aktus-embedding:8080"
+      host: "aktus-embedding:8080"   
     storage:
       models:
         bucketName: "aktus-platform-models"
@@ -115,27 +205,135 @@ aktus-multimodal-data-ingestion-service:
 
 aktus-embedding-service:
   enabled: true
+  aktusEmbedding:
+    image: gcr.io/aktus-ai-platform-public/aktus-platform-marketplace/aktus-embedding:v1.0.0
+    serviceAccount: "${RELEASE_NAME}-serviceaccount"
+    resources:
+      requests:
+        cpu: "1000m"
+        memory: "2Gi"
+        ephemeral-storage: "5Gi"
+      limits:
+        cpu: "14000m"
+        memory: "60Gi"
+        ephemeral-storage: "5Gi"
+    storage:
+      extractedData:
+        bucketName: "aktus-platform-extracted-data"
+      docUpload:
+        bucketName: "aktus-platform-doc-upload"
+      docProcessing:
+        bucketName: "aktus-platform-doc-processing"
+    persistence:
+      enabled: true
+      useEmptyDir: false
+      size: 500Gi
+    mdiService:
+      endpoint: "http://aktus-multimodal-data-ingestion:5315"
+    dbManager:
+      host: "http://34.68.43.151:8080" 
 
 # PostgreSQL configuration
 aktus-postgres-service:
   enabled: true
-  serviceAccount: "{{ .Values.serviceAccount.name }}"
+  serviceAccount: "${RELEASE_NAME}-serviceaccount"
   aktusPostgres:
     image: docker.io/library/postgres:13.16
     username: "root"
     password: "secret"
     database: "root"
     persistence:
-      enabled: true
-      size: 10Gi
-      storageClass: standard-rwo
+      enabled: true  # Disable PVC by default
+      useEmptyDir: false  # Use emptyDir instead
+      size: 5Gi
+      storageClass: standard
       accessMode: ReadWriteOnce
       subPath: postgresql-data
+    initScripts:
+      enabled: true
+      configMap: postgres-init
+    livenessProbe:
+      initialDelaySeconds: 60
+      periodSeconds: 10
+    readinessProbe:
+      initialDelaySeconds: 30
+      periodSeconds: 5
+    startupProbe:
+      failureThreshold: 30
+      periodSeconds: 10
+      initialDelaySeconds: 30
+      timeoutSeconds: 5
+
+# Qdrant vector database configuration
+qdrant:
+  enabled: true
+  qdrant:
+    image: qdrant/qdrant:v1.13.1
+    imagePullPolicy: Always
+    serviceAccount: "${RELEASE_NAME}-serviceaccount"
+    port: 6333
+    service:
+      type: LoadBalancer
+      port: 6333
+    persistence:
+      enabled: true
+      useEmptyDir: false
+      size: 500Gi
+    resources:
+      requests:
+        cpu: "500m"
+        memory: "1Gi"
+      limits:
+        cpu: "1000m"
+        memory: "2Gi"
+    livenessProbe:
+      initialDelaySeconds: 30
+      periodSeconds: 10
+    readinessProbe:
+      initialDelaySeconds: 5
+      periodSeconds: 5
+    config:
+      allowCrossOrigin: true
+      serviceHost: "0.0.0.0"
+      servicePort: 6333
+      snapshotsIntervalSec: 300
+      maxOptimizationThreads: 4
+    hpa:
+      enabled: false
 
 # Storage configuration
 storage:
   chroma:
-    size: "500Gi"
+    size: "10Gi"
+
+# API keys for external services
+secrets:
+  openaiApiKey: "dummy-key-for-testing"
+  huggingfaceLoginKey: "dummy-key-for-testing"
 
 # tester:
 #   image: us-docker.pkg.dev/aktus-ai-platform-public/aktus-platform-marketplace/service-tests:v1.0.0
+
+# Knowledge Assistant configuration
+aktus-knowledge-assistant-service:
+  enabled: true
+  serviceAccount:
+    name: "${RELEASE_NAME}-serviceaccount"
+  aktusKnowledgeAssistant:
+    image: us-docker.pkg.dev/aktus-ai-platform-public/aktus-platform-marketplace/aktus-knowledge-assistant:v1.0.0
+    imagePullPolicy: Always
+    port: 80
+    service:
+      type: ClusterIP
+      port: 8080
+    viteSocketUrl: "ws://${networkSettings.researchServiceIp}:8080/chat/copilot"
+    viteApiBaseUrl: "http://${networkSettings.databaseServiceIp}:8080"
+    viteWaitlistFormId: "c989a45ed2991b0cb7455a37ced244f0"
+    viteLeaseApiBaseUrl: "http://${networkSettings.researchServiceIp}:8080/chat"
+    resources:
+      requests:
+        cpu: "500m"
+        memory: "512Mi"
+      limits:
+        cpu: "1000m" 
+        memory: "1Gi"

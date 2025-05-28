@@ -34,6 +34,13 @@ dependencies:
     tags:
       - infrastructure
 
+  - name: qdrant
+    version: "1.0.0"
+    repository: "file://./charts/qdrant"
+    condition: qdrant-service.enabled
+    tags:
+      - infrastructure
+
   # Core Services (Level 2)
   - name: aktus-database-service
     version: "1.0.0"
@@ -60,3 +67,8 @@ dependencies:
     version: "1.0.0"
     repository: "file://./charts/aktus-embedding"
     condition: aktus-embedding-service.enabled
+
+  - name: aktus-knowledge-assistant-service
+    version: "1.0.0"
+    repository: "file://./charts/aktus-knowledge-assistant"
+    condition: aktus-knowledge-assistant-service.enabled

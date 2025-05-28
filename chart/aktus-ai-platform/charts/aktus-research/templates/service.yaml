@@ -4,10 +4,13 @@ metadata:
   name: aktus-research
   labels:
     app: aktus-research-service
+  annotations:
+    cloud.google.com/load-balancer-type: "External"
 spec:
-  type: {{ .Values.aktusResearch.service.type }}
+  type: LoadBalancer
+  loadBalancerIP: "{{ .Values.global.networkSettings.researchServiceIp }}"
   ports:
-    - port: {{ .Values.aktusResearch.service.port }}
+    - port: 8080
       targetPort: http
       protocol: TCP
       name: http

@@ -5,6 +5,7 @@ aktusResearch:
   service:
     type: LoadBalancer
     port: 8080
+    loadBalancerIP: ""
   
   auth:
     username: "guest"
@@ -17,7 +18,7 @@ aktusResearch:
     timeoutKeepAlive: "3600"
   
   modelInference:
-    address: ""
+    address: "aktus-inference:50051"
   
   embeddingService:
     host: "aktus-embedding:8080"
@@ -30,15 +31,15 @@ aktusResearch:
   # GCS storage configuration
   storage:
     documentUpload:
-      bucketName: "aktus-ai-platform-doc-upload"
+      bucketName: "aktus-platform-doc-upload"
       readOnly: false
       mountOptions: "implicit-dirs,file-mode=0666,dir-mode=0777"
     docProcessing:
-      bucketName: "aktus-ai-platform-doc-proc"
+      bucketName: "aktus-platform-doc-processing"
       readOnly: false
       mountOptions: "implicit-dirs,file-mode=0666,dir-mode=0777"
     extractedData:
-      bucketName: "aktus-ai-platform-ext-data"
+      bucketName: "aktus-platform-extracted-data"
       readOnly: false
       mountOptions: "implicit-dirs,file-mode=0666,dir-mode=0777"
   
@@ -46,6 +47,9 @@ aktusResearch:
     requests:
       cpu: "4000m"
       memory: "4Gi"
+    limits:
+      cpu: "4000m"
+      memory: "8Gi"
 
 healthcheck:
   initialDelaySeconds: 30

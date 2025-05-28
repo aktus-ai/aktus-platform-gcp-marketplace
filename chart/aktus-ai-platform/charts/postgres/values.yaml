@@ -7,7 +7,7 @@ aktusPostgres:
   port: 5432
   persistence:
     enabled: true
-    size: 50Gi
+    size: 5Gi
     storageClass: standard-rwo
     accessMode: ReadWriteOnce
     subPath: postgresql-data
