@@ -14,7 +14,7 @@ To manually configure the static IPs for the LoadBalancer services, run the foll
 
 3. Update the Knowledge Assistant WebSocket URL:
    kubectl set env deployment/aktus-knowledge-assistant -n {{ .Release.Namespace }} \
-   VITE_SOCKET_URL="ws://{{ index .Values "networkSettings.researchServiceIp" }}:8080/chat/copilot"
+   VITE_SOCKET_URL="ws://{{ index .Values "networkSettings.researchServiceIp" }}:8080/chat"
 
 The application services can be accessed at:
 - Research Service: http://{{ index .Values "networkSettings.researchServiceIp" }}:8080
