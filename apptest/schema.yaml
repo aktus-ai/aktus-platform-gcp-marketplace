@@ -3,7 +3,7 @@
 # Add top-level block to explicitly set version for testing
 x-google-marketplace:
   # Match the main schema version
-  publishedVersion: "1.0.0"
+  publishedVersion: "1.0.3"
 
 properties:
   name:

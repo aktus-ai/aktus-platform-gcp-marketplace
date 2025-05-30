@@ -52,6 +52,13 @@ global:
     knowledgeAssistantIp: ""
     databaseServiceIp: ""
     embeddingServiceIp: ""
+
+  storageSettings:
+    modelsBucketName: ""
+    docUploadBucketName: ""
+    docProcessingBucketName: ""
+    extractedDataBucketName: ""
+
   # Enable or disable GCS bucket access
   enableGCSAccess: true
   aktusInference:
@@ -231,7 +238,7 @@ aktus-embedding-service:
     mdiService:
       endpoint: "http://aktus-multimodal-data-ingestion:5315"
     dbManager:
-      host: "http://34.68.43.151:8080" 
+      host: "http://aktus-database:8080"
 
 # PostgreSQL configuration
 aktus-postgres-service:
@@ -326,10 +333,6 @@ aktus-knowledge-assistant-service:
     service:
       type: ClusterIP
       port: 8080
-    viteSocketUrl: "ws://${networkSettings.researchServiceIp}:8080/chat/copilot"
-    viteApiBaseUrl: "http://${networkSettings.databaseServiceIp}:8080"
-    viteWaitlistFormId: "c989a45ed2991b0cb7455a37ced244f0"
-    viteLeaseApiBaseUrl: "http://${networkSettings.researchServiceIp}:8080/chat"
     resources:
       requests:
         cpu: "500m"
@@ -337,3 +340,4 @@ aktus-knowledge-assistant-service:
       limits:
         cpu: "1000m" 
         memory: "1Gi"
+    

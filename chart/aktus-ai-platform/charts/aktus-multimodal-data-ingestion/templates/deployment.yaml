@@ -123,28 +123,28 @@ spec:
             driver: gcsfuse.csi.storage.gke.io
             readOnly: {{ .Values.aktusMdi.storage.models.readOnly }}
             volumeAttributes:
-              bucketName: {{ .Values.aktusMdi.storage.models.bucketName }}
+              bucketName: {{ .Values.global.storageSettings.modelsBucketName }}
               mountOptions: "{{ .Values.aktusMdi.storage.models.mountOptions }}"
         - name: doc-processing
           csi:
             driver: gcsfuse.csi.storage.gke.io
             readOnly: {{ .Values.aktusMdi.storage.docProcessing.readOnly }}
             volumeAttributes:
-              bucketName: {{ .Values.aktusMdi.storage.docProcessing.bucketName }}
+              bucketName: {{ .Values.global.storageSettings.docProcessingBucketName }}
               mountOptions: "{{ .Values.aktusMdi.storage.docProcessing.mountOptions }}"
         - name: extracted-data
           csi:
             driver: gcsfuse.csi.storage.gke.io
             readOnly: {{ .Values.aktusMdi.storage.extractedData.readOnly }}
             volumeAttributes:
-              bucketName: {{ .Values.aktusMdi.storage.extractedData.bucketName }}
+              bucketName: {{ .Values.global.storageSettings.extractedDataBucketName }}
               mountOptions: "{{ .Values.aktusMdi.storage.extractedData.mountOptions }}"
         - name: document-upload
           csi:
             driver: gcsfuse.csi.storage.gke.io
             readOnly: {{ .Values.aktusMdi.storage.docUpload.readOnly }}
             volumeAttributes:
-              bucketName: {{ .Values.aktusMdi.storage.docUpload.bucketName }}
+              bucketName: {{ .Values.global.storageSettings.docUploadBucketName }}
               mountOptions: "{{ .Values.aktusMdi.storage.docUpload.mountOptions }}"
         {{- else }}
         - name: models-data

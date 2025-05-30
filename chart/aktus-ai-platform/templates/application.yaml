@@ -32,23 +32,23 @@ spec:
 
       ## Getting Started
 
-      1. Access the Research Service at http://{{ index .Values "networkSettings.researchServiceIp" }}:8080
-      2. Access the Knowledge Assistant at http://{{ index .Values "networkSettings.knowledgeAssistantIp" }}:8080
+      1. Access the Research Service at http://{{ index .Values "global.networkSettings.researchServiceIp" }}:8080
+      2. Access the Knowledge Assistant at http://{{ index .Values "global.networkSettings.knowledgeAssistantIp" }}:8080
       3. For the inference service, use gRPC at aktus-inference:50051 (internal)
       
       ## WebSocket Configuration
       
       The Knowledge Assistant service uses WebSocket connections to the Research Service for chat functionality.
       Your deployment is configured to use:
-      - Research Service IP: {{ index .Values "networkSettings.researchServiceIp" }}
-      - Knowledge Assistant IP: {{ index .Values "networkSettings.knowledgeAssistantIp" }}
-      - WebSocket URL: ws://{{ index .Values "networkSettings.researchServiceIp" }}/chat/copilot
+      - Research Service IP: {{ index .Values "global.networkSettings.researchServiceIp" }}
+      - Knowledge Assistant IP: {{ index .Values "global.networkSettings.knowledgeAssistantIp" }}
+      - WebSocket URL: ws://{{ index .Values "global.networkSettings.researchServiceIp" }}/chat
       
       ## Static IP Resources
       
       The deployment uses the following static IP resources:
-      - Research Service IP: {{ index .Values "networkSettings.researchServiceIp" }} (name: {{ index .Values "networkSettings.researchServiceIpName" }})
-      - Knowledge Assistant IP: {{ index .Values "networkSettings.knowledgeAssistantIp" }} (name: {{ index .Values "networkSettings.knowledgeAssistantIpName" }})
+      - Research Service IP: {{ index .Values "global.networkSettings.researchServiceIp" }}
+      - Knowledge Assistant IP: {{ index .Values "global.networkSettings.knowledgeAssistantIp" }}
       
       ## Components
 
@@ -69,25 +69,25 @@ spec:
       ## Storage
 
       The platform uses GCS storage buckets for:
-      {{- if .Values.aktusInference }}
-      {{- if .Values.aktusInference.storage }}
-      {{- if .Values.aktusInference.storage.models }}
-      - Model storage: {{ .Values.aktusInference.storage.models.bucketName }}
+      {{- if .Values.global }}
+      {{- if .Values.global.storageSettings }}
+      {{- if .Values.global.storageSettings.modelsBucketName }}
+      - Model storage: {{ .Values.global.storageSettings.modelsBucketName }}
       {{- else }}
       - Model storage: [Not configured]
       {{- end }}
-      {{- if .Values.aktusInference.storage.docUpload }}
-      - Document uploads: {{ .Values.aktusInference.storage.docUpload.bucketName }}
+      {{- if .Values.global.storageSettings.docUploadBucketName }}
+      - Document uploads: {{ .Values.global.storageSettings.docUploadBucketName }}
       {{- else }}
       - Document uploads: [Not configured]
       {{- end }}
-      {{- if .Values.aktusInference.storage.docProcessing }}
-      - Document processing: {{ .Values.aktusInference.storage.docProcessing.bucketName }}
+      {{- if .Values.global.storageSettings.docProcessingBucketName }}
+      - Document processing: {{ .Values.global.storageSettings.docProcessingBucketName }}
       {{- else }}
       - Document processing: [Not configured]
       {{- end }}
-      {{- if .Values.aktusInference.storage.extractedData }}
-      - Extracted data: {{ .Values.aktusInference.storage.extractedData.bucketName }}
+      {{- if .Values.global.storageSettings.extractedDataBucketName }}
+      - Extracted data: {{ .Values.global.storageSettings.extractedDataBucketName }}
       {{- else }}
       - Extracted data: [Not configured]
       {{- end }}

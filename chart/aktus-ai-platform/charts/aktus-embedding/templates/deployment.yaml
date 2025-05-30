@@ -106,21 +106,21 @@ spec:
             driver: gcsfuse.csi.storage.gke.io
             readOnly: false
             volumeAttributes:
-              bucketName: {{ .Values.aktusEmbedding.storage.extractedData.bucketName | default "aktus-platform-extracted-data" | quote }}
+              bucketName: {{ .Values.global.storageSettings.extractedDataBucketName | default "aktus-platform-extracted-data" | quote }}
               mountOptions: "implicit-dirs"
         - name: document-upload
           csi:
             driver: gcsfuse.csi.storage.gke.io
             readOnly: false
             volumeAttributes:
-              bucketName: {{ .Values.aktusEmbedding.storage.docUpload.bucketName | default "aktus-platform-doc-upload" | quote }}
+              bucketName: {{ .Values.global.storageSettings.docUploadBucketName | default "aktus-platform-doc-upload" | quote }}
               mountOptions: "implicit-dirs"
         - name: doc-processing
           csi:
             driver: gcsfuse.csi.storage.gke.io
             readOnly: false
             volumeAttributes:
-              bucketName: {{ .Values.aktusEmbedding.storage.docProcessing.bucketName | default "aktus-platform-doc-processing" | quote }}
+              bucketName: {{ .Values.global.storageSettings.docProcessingBucketName | default "aktus-platform-doc-processing" | quote }}
               mountOptions: "implicit-dirs"
         {{- else }}
         - name: extracted-data
