@@ -1,17 +1,23 @@
 # Network Configuration
+> **Step 2:** Create external static IP addresses for all Aktus AI Platform services
 
-# Step 2: Network Configuration
+---
 
-Create external static IP addresses for all Aktus AI Platform services.
+## 🎥 Related Videos
+- **[Create_IP_Addresses](https://drive.google.com/file/d/1p-TYGfNnmxeVhxobTVmoXr5i7H9w-OZP/view?usp=sharing)** `5 min`
 
-## Prerequisites
+---
+
+## 📋 Prerequisites
 
 - Completed Step 1 (Cluster Setup)
 - Google Cloud SDK configured
 
-## Commands
+---
 
-### Environment Setup
+## ⚡ Quick Setup
+
+### Environment Variables
 ```bash
 export PROJECT_ID="your-project-id"
 export REGION="us-central1"
@@ -40,7 +46,10 @@ gcloud compute addresses create aktus-knowledge-assistant-ip \
   --project=$PROJECT_ID
 ```
 
-### Get IP Addresses
+---
+
+## 📍 Get IP Addresses
+
 ```bash
 export RESEARCH_IP=$(gcloud compute addresses describe aktus-research-service-ip --region=$REGION --format="value(address)")
 export DATABASE_IP=$(gcloud compute addresses describe aktus-database-service-ip --region=$REGION --format="value(address)")
@@ -53,7 +62,10 @@ echo "Embedding Service IP: $EMBEDDING_IP"
 echo "Knowledge Assistant IP: $KNOWLEDGE_ASSISTANT_IP"
 ```
 
-### Create Firewall Rules
+---
+
+## 🔥 Create Firewall Rules
+
 ```bash
 gcloud compute firewall-rules create aktus-research-allow-8080 \
   --allow tcp:8080 \
@@ -76,12 +88,19 @@ gcloud compute firewall-rules create aktus-knowledge-assistant-allow-3000 \
   --project=$PROJECT_ID
 ```
 
-### Verification
+---
+
+## ✅ Verification
+
 ```bash
 gcloud compute addresses list --filter="region:$REGION" --project=$PROJECT_ID
 gcloud compute firewall-rules list --filter="name~aktus" --project=$PROJECT_ID
 ```
 
-## Next Steps
+---
 
-📍 **[Step 3: Storage Configuration](storage-configuration.md)**
+<div align="center">
+
+**Next Step:** [Storage Configuration](storage-configuration.md) →
+
+</div>

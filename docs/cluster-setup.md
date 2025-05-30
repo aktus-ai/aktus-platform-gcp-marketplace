@@ -1,18 +1,26 @@
 # Cluster Setup
+> **Step 1:** Create GKE cluster and configure Workload Identity for Aktus AI Platform
 
-# Step 1: Cluster Setup & Identity Configuration
+---
 
-Create GKE cluster and configure Workload Identity for Aktus AI Platform.
+## 🎥 Related Videos
+- **[Create_Cluster](https://drive.google.com/file/d/1jN72wLWiD_R-nyb-ry0W6oLpD9LY16Rv/view?usp=sharing)** `30 min`
+- **[GCSFuse_Cluster](https://drive.google.com/file/d/19wrUxLJXTvxQqUjrmbE3bfO3EHhNuvZh/view?usp=sharing)** `30 min`
+- **[GCSFuse_Node](https://drive.google.com/file/d/1z2T3Al1JHzTSJB_VwrAz7C1XL636UfQw/view?usp=sharing)** `10 min`
 
-## Prerequisites
+---
+
+## 📋 Prerequisites
 
 - Google Cloud Project with billing enabled
 - Google Cloud SDK installed
 - Project Owner permissions
 
-## Commands
+---
 
-### Environment Setup
+## ⚡ Quick Setup
+
+### Environment Variables
 ```bash
 export PROJECT_ID="your-project-id"
 export CLUSTER_NAME="aktus-ai-cluster"
@@ -49,6 +57,10 @@ gcloud container node-pools create gpu-pool \
   --workload-metadata=GKE_METADATA
 ```
 
+---
+
+## 🔐 Identity Configuration
+
 ### Connect to Cluster
 ```bash
 gcloud container clusters get-credentials $CLUSTER_NAME \
@@ -84,12 +96,19 @@ gcloud projects add-iam-policy-binding $PROJECT_ID \
   --role="roles/storage.objectUser"
 ```
 
-### Verification
+---
+
+## ✅ Verification
+
 ```bash
 kubectl get nodes
 kubectl get namespace $NAMESPACE
 ```
 
-## Next Steps
+---
 
-📍 **[Step 2: Network Configuration](network-configuration.md)**
+<div align="center">
+
+**Next Step:** [Network Configuration](network-configuration.md) →
+
+</div>
