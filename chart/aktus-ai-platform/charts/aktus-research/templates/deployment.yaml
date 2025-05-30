@@ -95,21 +95,21 @@ spec:
             driver: gcsfuse.csi.storage.gke.io
             readOnly: false
             volumeAttributes:
-              bucketName: {{ .Values.aktusResearch.storage.documentUpload.bucketName }}
+              bucketName: {{ .Values.global.storageSettings.docUploadBucketName }}
               mountOptions: "{{ .Values.aktusResearch.storage.documentUpload.mountOptions }}"
         - name: doc-processing
           csi:
             driver: gcsfuse.csi.storage.gke.io
             readOnly: false
             volumeAttributes:
-              bucketName: {{ .Values.aktusResearch.storage.docProcessing.bucketName }}
+              bucketName: {{ .Values.global.storageSettings.docProcessingBucketName }}
               mountOptions: "{{ .Values.aktusResearch.storage.docProcessing.mountOptions }}"
         - name: extracted-data
           csi:
             driver: gcsfuse.csi.storage.gke.io
             readOnly: false
             volumeAttributes:
-              bucketName: {{ .Values.aktusResearch.storage.extractedData.bucketName }}
+              bucketName: {{ .Values.global.storageSettings.extractedDataBucketName }}
               mountOptions: "{{ .Values.aktusResearch.storage.extractedData.mountOptions }}"
       {{- else }}
         - name: document-upload

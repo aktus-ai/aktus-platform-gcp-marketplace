@@ -93,21 +93,21 @@ spec:
             driver: gcsfuse.csi.storage.gke.io
             readOnly: {{ .Values.aktusInference.storage.models.readOnly }}
             volumeAttributes:
-              bucketName: {{ .Values.aktusInference.storage.models.bucketName }}
+              bucketName: {{ .Values.global.storageSettings.modelsBucketName }}
               mountOptions: "{{ .Values.aktusInference.storage.models.mountOptions }}"
         - name: document-upload
           csi:
             driver: gcsfuse.csi.storage.gke.io
             readOnly: {{ .Values.aktusInference.storage.docUpload.readOnly }}
             volumeAttributes:
-              bucketName: {{ .Values.aktusInference.storage.docUpload.bucketName }}
+              bucketName: {{ .Values.global.storageSettings.docUploadBucketName }}
               mountOptions: "{{ .Values.aktusInference.storage.docUpload.mountOptions }}"
         - name: doc-processing
           csi:
             driver: gcsfuse.csi.storage.gke.io
             readOnly: {{ .Values.aktusInference.storage.docProcessing.readOnly }}
             volumeAttributes:
-              bucketName: {{ .Values.aktusInference.storage.docProcessing.bucketName }}
+              bucketName: {{ .Values.global.storageSettings.docProcessingBucketName }}
               mountOptions: "{{ .Values.aktusInference.storage.docProcessing.mountOptions }}"
         - name: ephemeral
           emptyDir:

@@ -17,8 +17,8 @@ spec:
       serviceAccountName: "{{ .Release.Name }}-serviceaccount"
       containers:
         - name: aktus-knowledge-assistant-service
-          image: {{ .Values.aktusKnowledgeAssistant.image }}
-          imagePullPolicy: {{ .Values.aktusKnowledgeAssistant.imagePullPolicy }}
+          image: "{{ .Values.aktusKnowledgeAssistant.image }}"
+          imagePullPolicy: "{{ .Values.aktusKnowledgeAssistant.imagePullPolicy }}"
           ports:
             - containerPort: {{ .Values.aktusKnowledgeAssistant.port }}
               name: http
@@ -31,10 +31,14 @@ spec:
             timeoutSeconds: 5
           env:
             - name: VITE_SOCKET_URL
-              value: "ws://{{ .Values.global.networkSettings.researchServiceIp }}:8080/chat/copilot"
+              value: "ws://{{ .Values.global.networkSettings.researchServiceIp }}:8080/chat"
             - name: VITE_API_BASE_URL
-              value: {{ .Values.aktusKnowledgeAssistant.viteApiBaseUrl | quote }}
+              value: "http://{{ .Values.global.networkSettings.databaseServiceIp }}:8080"
             - name: VITE_WAITLIST_FORM_ID
-              value: {{ .Values.aktusKnowledgeAssistant.viteWaitlistFormId | quote }}
+              value: "c989a45ed2991b0cb7455a37ced244f0"
+            - name: VITE_LEASE_API_BASE_URL
+              value: "http://{{ .Values.global.networkSettings.researchServiceIp }}:8080"
+            - name: VITE_API_EMBED_URL
+              value: "http://{{ .Values.global.networkSettings.embeddingServiceIp }}:8080"
           resources:
             {{- toYaml .Values.aktusKnowledgeAssistant.resources | nindent 12 }}
