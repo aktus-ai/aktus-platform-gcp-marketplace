@@ -47,15 +47,15 @@ Follow the videos in order:
 
 | Order | Video | Duration | Purpose |
 |-------|-------|----------|---------|
-| 1 | [Create_Cluster](docs/videos/Create_Cluster.mov) | 30 min | Cluster + Identity |
-| 2 | [Create_IP_Addresses](docs/videos/Create_IP_Addresses.mov) | 5 min | Static IPs |
-| 3 | [Create_Buckets](docs/videos/Create_Buckets.mov) | 6 min | GCS buckets |
-| 4 | [GCSFuse_Cluster](docs/videos/GCSFuse_Cluster.mov) | 30 min | Cluster GCS Fuse |
-| 5 | [GCSFuse_Node](docs/videos/GCSFuse_Node.mov) | 10 min | Node GCS Fuse |
-| 6 | [Deploy](docs/videos/Deploy.mov) | 10 min | Marketplace deploy |
+| 1 | [Create_Cluster](https://drive.google.com/file/d/1jN72wLWiD_R-nyb-ry0W6oLpD9LY16Rv/view?usp=sharing) | 30 min | Cluster + Identity |
+| 2 | [GCSFuse_Cluster](https://drive.google.com/file/d/19wrUxLJXTvxQqUjrmbE3bfO3EHhNuvZh/view?usp=sharing) | 30 min | Cluster GCS Fuse |
+| 3 | [GCSFuse_Node](https://drive.google.com/file/d/1z2T3Al1JHzTSJB_VwrAz7C1XL636UfQw/view?usp=sharing) | 10 min | Node GCS Fuse |
+| 4 | [Create_IP_Addresses](https://drive.google.com/file/d/1p-TYGfNnmxeVhxobTVmoXr5i7H9w-OZP/view?usp=sharing) | 5 min | Static IPs |
+| 5 | [Create_Buckets](https://drive.google.com/file/d/194XKRYR4rNB7rdlhfhMxtLPWRdEgJKd1/view?usp=sharing) | 6 min | GCS buckets |
+| 6 | [Deploy](https://drive.google.com/file/d/1Hz256McmAUep-yTbBIa0vW2W_aRTCxUK/view?usp=sharing) | 10 min | Marketplace deploy |
 | 7 | **⏱️ Wait 5 minutes** | - | Pod initialization |
-| 8 | [Embed](docs/videos/Embed.mov) | Variable | Document processing |
-| 9 | [Test](docs/videos/Test.mov) | 5 min | Test functionality |
+| 8 | [Embed](https://drive.google.com/file/d/1_rlsF6Sequa8Mcf3NKY0yoXKZWTXZ8-o/view?usp=sharing) | Variable | Document processing |
+| 9 | [Test](https://drive.google.com/file/d/1Vg5s7XBMkC2RF_xlPcRpUUaxW-G7F8em/view?usp=sharing) | 5 min | Test functionality |
 
 **Total Time:** ~96 minutes + document processing
 
