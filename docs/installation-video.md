@@ -8,30 +8,30 @@ Complete video series for deploying Aktus AI Platform on Google Cloud Marketplac
 
 ### Infrastructure Setup Videos
 
-#### [🔧 Create_Cluster (30 min)](videos/create-cluster.mp4)
+#### [🔧 Create_Cluster (30 min)](videos/Create_Cluster.mov)
 Create standard GKE cluster and enable Workload Identity
 
-#### [🌐 Network Configuration (5 min)](videos/network-config.mp4)
+#### [🌐 Network Configuration (5 min)](videos/Create_IP_Addresses.mov)
 Create static IP addresses and firewall rules
 
-#### [💾 Storage Configuration (6 min)](videos/storage-config.mp4)
+#### [💾 Storage Configuration (6 min)](videos/Create_Buckets.mov)
 Create GCS buckets and configure permissions
 
-#### [📁 GCSFuse-cluster (30 min)](videos/gcsfuse-cluster.mp4)
+#### [📁 GCSFuse-cluster (30 min)](videos/GCSFuse_Cluster.mov)
 Enable GCS Fuse CSI Driver on cluster
 
-#### [📁 GCSFuse-node (10 min)](videos/gcsfuse-node.mp4)
+#### [📁 GCSFuse-node (10 min)](videos/GCSFuse_Node.mov)
 Enable GCS Fuse on node pools
 
 ### Deployment & Testing Videos
 
-#### [🚀 Deploy (10 min)](videos/deploy.mp4)
+#### [🚀 Deploy (10 min)](videos/Deploy.mov)
 Google Cloud Marketplace deployment
 
-#### [📄 Embed (Variable duration)](videos/embed.mp4)
+#### [📄 Embed (Variable duration)](videos/Embed.mov)
 Upload and embed documents (*processing time varies by document size*)
 
-#### [❓ Test (5 min)](videos/test.mp4)
+#### [❓ Test (5 min)](videos/Test.mov)
 Test AI functionality with questions
 
 ---
@@ -41,10 +41,10 @@ Test AI functionality with questions
 | Order | Video | Duration | Purpose |
 |-------|-------|----------|---------|
 | 1 | Create_Cluster | 30 min | Cluster + Identity |
-| 2 | Network Configuration | 5 min | Static IPs |
-| 3 | Storage Configuration | 6 min | GCS buckets |
-| 4 | GCSFuse-cluster | 30 min | Cluster GCS Fuse |
-| 5 | GCSFuse-node | 10 min | Node GCS Fuse |
+| 2 | Create_IP_Addresses | 5 min | Static IPs |
+| 3 | Create_Buckets | 6 min | GCS buckets |
+| 4 | GCSFuse_Cluster | 30 min | Cluster GCS Fuse |
+| 5 | GCSFuse_Node | 10 min | Node GCS Fuse |
 | 6 | Deploy | 10 min | Marketplace deploy |
 | 7 | **⏱️ Wait 5 minutes** | - | Pod initialization |
 | 8 | Embed | Variable | Document processing |
