@@ -37,10 +37,11 @@ data:
         "chunking_strategy" TEXT NOT NULL DEFAULT 'semantic',
         "metric_type" TEXT NOT NULL DEFAULT 'cosine',
         "indexName" TEXT NOT NULL DEFAULT '',
-        "graphrag_indexed" BOOLEAN NOT NULL DEFAULT FALSE,
         "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
         "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
         "domainId" TEXT NOT NULL,
+        "graphrag_indexed" BOOLEAN NOT NULL DEFAULT FALSE,
+        "in_progress" BOOLEAN NOT NULL DEFAULT FALSE,
 
         CONSTRAINT "Usecase_pkey" PRIMARY KEY ("id")
     );
