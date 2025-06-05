@@ -71,6 +71,10 @@ spec:
               value: abstract
             - name: LEASE_DATA_CASHFLOW_FOLDER
               value: cashflow
+            - name: VDB_ENDPOINT
+              value: http://aktus-embedding:8080
+            - name: DB_MANAGER_ENDPOINT
+              value: http://aktus-database:8080
           volumeMounts:
             - name: document-upload
               mountPath: {{ .Values.aktusResearch.paths.docUpload }}
