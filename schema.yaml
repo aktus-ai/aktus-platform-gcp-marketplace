@@ -95,9 +95,9 @@ form:
         <div style="background: #fff; padding: 20px; border-radius: 10px; margin-top: 20px; margin-bottom: 8px; border: 1px solid #e8eaed; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
           <h3 style="margin-top: 0; font-weight: 600; color: #1a73e8; font-size: 16px; display: flex; align-items: center;">
             <span style="background: #e8f0fe; color: #1a73e8; border-radius: 50%; width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; margin-right: 8px;">2</span>
-            Create Static IP Addresses
+            Create Static IP Address
           </h3>
-          <p style="margin: 12px 0 8px 32px; color: #5f6368; font-size: 14px; font-weight: 500;">⚠️ Create 4 external static IPs in your GCP project.</p>
+          <p style="margin: 12px 0 8px 32px; color: #5f6368; font-size: 14px; font-weight: 500;">⚠️ Create 1 external static IP in your GCP project.</p>
           <ul style="margin: 0 0 0 32px; padding-left: 16px; line-height: 1.8; color: #202124; font-size: 14px;">
           </ul>
           <div style="background: #e3f2fd; padding: 12px; border-radius: 6px; margin: 16px 0 0 32px; border-left: 3px solid #2196f3;">
@@ -265,13 +265,7 @@ properties:
     type: string
     title: "Step 2: Research Service Static IP"
     description: "Static IP address for the Research Service (WebSocket backend). Must be in the same region as your GKE cluster."
-    default: ""
-  
-  global.networkSettings.knowledgeAssistantIp:
-    type: string
-    title: "Step 2: Knowledge Assistant Static IP"
-    description: "Static IP address for the Knowledge Assistant frontend. Must be in the same region as your GKE cluster."
-    default: ""
+    default: ""  
 
   # Storage Configuration (Global)
   global.storageSettings.modelsBucketName:
@@ -366,9 +360,6 @@ required:
   - secrets.huggingfaceLoginKey
   - gcpServiceAccountEmail
   - global.networkSettings.researchServiceIp
-  - global.networkSettings.databaseServiceIp
-  - global.networkSettings.embeddingServiceIp
-  - global.networkSettings.knowledgeAssistantIp
   - global.storageSettings.modelsBucketName
   - global.storageSettings.docUploadBucketName
   - global.storageSettings.docProcessingBucketName
