@@ -32,8 +32,10 @@ spec:
           env:
             - name: VITE_SOCKET_URL
               value: "ws://{{ .Values.global.networkSettings.researchServiceIp }}:8080/chat"
+            - name: DB_MANAGER_ENDPOINT
+              value: "{{ .Values.aktusKnowledgeAssistant.dbManagerEndpoint | default .Values.global.dbManagerEndpoint | default "http://aktus-database:8080" }}"
             - name: VITE_API_BASE_URL
-              value: "http://{{ .Values.global.networkSettings.databaseServiceIp }}:8080"
+              value: "{{ .Values.aktusKnowledgeAssistant.dbManagerEndpoint | default .Values.global.dbManagerEndpoint | default "http://aktus-database:8080" }}"
             - name: VITE_WAITLIST_FORM_ID
               value: "c989a45ed2991b0cb7455a37ced244f0"
             - name: VITE_LEASE_API_BASE_URL

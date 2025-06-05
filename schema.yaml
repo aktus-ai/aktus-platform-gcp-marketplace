@@ -267,12 +267,6 @@ properties:
     description: "Static IP address for the Research Service (WebSocket backend). Must be in the same region as your GKE cluster."
     default: ""
   
-  global.networkSettings.databaseServiceIp:
-    type: string
-    title: "Step 2: Database Service Static IP"
-    description: "Static IP address for the Database Service. Must be in the same region as your GKE cluster."
-    default: ""
-
   global.networkSettings.embeddingServiceIp:
     type: string
     title: "Step 2: Embedding Service Static IP"

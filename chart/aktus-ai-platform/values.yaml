@@ -52,6 +52,9 @@ global:
     knowledgeAssistantIp: ""
     databaseServiceIp: ""
     embeddingServiceIp: ""
+  
+  # Database manager endpoint configuration
+  dbManagerEndpoint: ""  # Default endpoint for the database manager service
 
   storageSettings:
     modelsBucketName: ""

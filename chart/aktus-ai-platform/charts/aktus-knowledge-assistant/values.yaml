@@ -7,6 +7,9 @@ aktusKnowledgeAssistant:
     port: 8080
     loadBalancerIP: ""
   
+  # Database manager endpoint configuration
+  dbManagerEndpoint: ""  # If not set, will use global.dbManagerEndpoint or default to "http://aktus-database:8080"
+  
   # viteSocketUrl: "ws://aktus-research:8080/chat"
   # viteApiBaseUrl: "http://aktus-database:8080"
   # viteWaitlistFormId: "c989a45ed2991b0cb7455a37ced244f0"
