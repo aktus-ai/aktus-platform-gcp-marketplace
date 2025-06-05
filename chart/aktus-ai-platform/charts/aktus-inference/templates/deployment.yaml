@@ -67,9 +67,9 @@ spec:
               value: "all"
             - name: CUDA_VISIBLE_DEVICES
               value: "0"
+            - name: USE_MINICPM_FOR_FLOWCHART
+              value: "true"
           volumeMounts:
-            - name: models-data
-              mountPath: {{ .Values.aktusInference.paths.models }}
             - name: document-upload
               mountPath: {{ .Values.aktusInference.paths.docUpload }}
             - name: doc-processing
@@ -88,13 +88,6 @@ spec:
               memory: "32Gi"
               ephemeral-storage: "5Gi"
       volumes:
-        - name: models-data
-          csi:
-            driver: gcsfuse.csi.storage.gke.io
-            readOnly: {{ .Values.aktusInference.storage.models.readOnly }}
-            volumeAttributes:
-              bucketName: {{ .Values.global.storageSettings.modelsBucketName }}
-              mountOptions: "{{ .Values.aktusInference.storage.models.mountOptions }}"
         - name: document-upload
           csi:
             driver: gcsfuse.csi.storage.gke.io
