@@ -98,6 +98,6 @@ After successful deployment:
 
 **Ready to deploy your AI platform?** 🚀
 
-*Version 1.0.3 | Last Updated: May 2025*
+*Version 1.0.8 | Last Updated: May 2025*
 
 </div>
