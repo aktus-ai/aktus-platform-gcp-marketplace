@@ -40,7 +40,7 @@ spec:
               value: "c989a45ed2991b0cb7455a37ced244f0"
             - name: VITE_LEASE_API_BASE_URL
               value: "http://{{ .Values.global.networkSettings.researchServiceIp }}:8080"
-            - name: VITE_API_EMBED_URL
-              value: "http://{{ .Values.global.networkSettings.embeddingServiceIp }}:8080"
+            - name: VDB_ENDPOINT
+              value: "{{ .Values.aktusKnowledgeAssistant.embeddingEndpoint | default .Values.global.embeddingEndpoint | default "http://aktus-embedding:8080" }}"
           resources:
             {{- toYaml .Values.aktusKnowledgeAssistant.resources | nindent 12 }}

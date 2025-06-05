@@ -55,6 +55,9 @@ global:
   
   # Database manager endpoint configuration
   dbManagerEndpoint: ""  # Default endpoint for the database manager service
+  
+  # Embedding service endpoint configuration
+  embeddingEndpoint: ""  # Default endpoint for the embedding service
 
   storageSettings:
     modelsBucketName: ""

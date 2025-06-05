@@ -14,7 +14,7 @@ aktusEmbedding:
   mdiService:
     endpoint: "http://aktus-multimodal-data-ingestion:5315"
   dbManager:
-    host: "http://aktus-database:8080"
+    endpoint: ""  # If not set, will use global.dbManagerEndpoint or default to "http://aktus-database:8080"
   paths:
     extractedData: "/extracted_data"
     docUpload: "/document_upload"

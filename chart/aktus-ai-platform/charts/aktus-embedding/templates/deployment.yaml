@@ -59,7 +59,7 @@ spec:
             - name: DOC_UPLOAD_DIR
               value: "{{ .Values.aktusEmbedding.paths.docUpload }}"
             - name: DB_MANAGER_HOST
-              value: "{{ .Values.aktusEmbedding.dbManager.host }}"
+              value: "{{ .Values.aktusEmbedding.dbManager.endpoint | default .Values.global.dbManagerEndpoint | default "http://aktus-database:8080" }}"
             - name: QDRANT_URL
               value: "http://qdrant:6333"
             - name: VECTOR_DB_TYPE
