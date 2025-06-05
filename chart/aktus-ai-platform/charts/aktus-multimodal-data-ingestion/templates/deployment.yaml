@@ -105,9 +105,9 @@ spec:
               value: "1"
             - name: VDB_GRAPHRAG_INDEXING_ENDPOINT
               value: "http://{{ .Values.aktusMdi.vectorEmbedding.host }}/vectorindex/index_graphrag"
+            - name: USE_MINICPM_FOR_FLOWCHART
+              value: "true"
           volumeMounts:
-            - name: models-data
-              mountPath: {{ .Values.aktusMdi.paths.models }}
             - name: doc-processing
               mountPath: {{ .Values.aktusMdi.paths.docProcessing }}
             - name: extracted-data
@@ -118,13 +118,6 @@ spec:
             {{- toYaml .Values.aktusMdi.resources | nindent 12 }}
       volumes:
         {{- if .Values.global.enableGCSAccess }}
-        - name: models-data
-          csi:
-            driver: gcsfuse.csi.storage.gke.io
-            readOnly: {{ .Values.aktusMdi.storage.models.readOnly }}
-            volumeAttributes:
-              bucketName: {{ .Values.global.storageSettings.modelsBucketName }}
-              mountOptions: "{{ .Values.aktusMdi.storage.models.mountOptions }}"
         - name: doc-processing
           csi:
             driver: gcsfuse.csi.storage.gke.io
@@ -147,8 +140,6 @@ spec:
               bucketName: {{ .Values.global.storageSettings.docUploadBucketName }}
               mountOptions: "{{ .Values.aktusMdi.storage.docUpload.mountOptions }}"
         {{- else }}
-        - name: models-data
-          emptyDir: {}
         - name: doc-processing
           emptyDir: {}
         - name: extracted-data

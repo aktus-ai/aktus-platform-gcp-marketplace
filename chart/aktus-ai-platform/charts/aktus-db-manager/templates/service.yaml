@@ -7,7 +7,6 @@ metadata:
     cloud.google.com/load-balancer-type: "External"
 spec:
   type: LoadBalancer
-  loadBalancerIP: "{{ .Values.global.networkSettings.databaseServiceIp }}"
   ports:
     - port: 8080
       targetPort: http

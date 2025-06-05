@@ -30,26 +30,6 @@ spec:
 
       Thank you for installing the Aktus AI Platform!
 
-      ## Getting Started
-
-      1. Access the Research Service at http://{{ index .Values "global.networkSettings.researchServiceIp" }}:8080
-      2. Access the Knowledge Assistant at http://{{ index .Values "global.networkSettings.knowledgeAssistantIp" }}:8080
-      3. For the inference service, use gRPC at aktus-inference:50051 (internal)
-      
-      ## WebSocket Configuration
-      
-      The Knowledge Assistant service uses WebSocket connections to the Research Service for chat functionality.
-      Your deployment is configured to use:
-      - Research Service IP: {{ index .Values "global.networkSettings.researchServiceIp" }}
-      - Knowledge Assistant IP: {{ index .Values "global.networkSettings.knowledgeAssistantIp" }}
-      - WebSocket URL: ws://{{ index .Values "global.networkSettings.researchServiceIp" }}/chat
-      
-      ## Static IP Resources
-      
-      The deployment uses the following static IP resources:
-      - Research Service IP: {{ index .Values "global.networkSettings.researchServiceIp" }}
-      - Knowledge Assistant IP: {{ index .Values "global.networkSettings.knowledgeAssistantIp" }}
-      
       ## Components
 
       The platform consists of the following services:
@@ -71,11 +51,6 @@ spec:
       The platform uses GCS storage buckets for:
       {{- if .Values.global }}
       {{- if .Values.global.storageSettings }}
-      {{- if .Values.global.storageSettings.modelsBucketName }}
-      - Model storage: {{ .Values.global.storageSettings.modelsBucketName }}
-      {{- else }}
-      - Model storage: [Not configured]
-      {{- end }}
       {{- if .Values.global.storageSettings.docUploadBucketName }}
       - Document uploads: {{ .Values.global.storageSettings.docUploadBucketName }}
       {{- else }}

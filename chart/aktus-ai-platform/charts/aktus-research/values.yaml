@@ -1,5 +1,5 @@
 aktusResearch:
-  image: us-docker.pkg.dev/aktus-ai-platform-public/aktus-platform-marketplace/aktus-research:1.0.3
+  image: us-docker.pkg.dev/aktus-ai-platform-public/aktus-platform-marketplace/aktus-research:1.0.8
   imagePullPolicy: Always
   port: 8080
   service:

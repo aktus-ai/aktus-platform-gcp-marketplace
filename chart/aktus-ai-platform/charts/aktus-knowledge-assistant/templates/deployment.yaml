@@ -33,12 +33,12 @@ spec:
             - name: VITE_SOCKET_URL
               value: "ws://{{ .Values.global.networkSettings.researchServiceIp }}:8080/chat"
             - name: VITE_API_BASE_URL
-              value: "http://{{ .Values.global.networkSettings.databaseServiceIp }}:8080"
+              value: "http://{{ .Values.global.networkSettings.researchServiceIp }}:8080/db-manager"
             - name: VITE_WAITLIST_FORM_ID
               value: "c989a45ed2991b0cb7455a37ced244f0"
             - name: VITE_LEASE_API_BASE_URL
               value: "http://{{ .Values.global.networkSettings.researchServiceIp }}:8080"
             - name: VITE_API_EMBED_URL
-              value: "http://{{ .Values.global.networkSettings.embeddingServiceIp }}:8080"
+              value: "http://{{ .Values.global.networkSettings.researchServiceIp }}:8080/embeddings"
           resources:
             {{- toYaml .Values.aktusKnowledgeAssistant.resources | nindent 12 }}

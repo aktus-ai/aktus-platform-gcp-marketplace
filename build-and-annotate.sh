@@ -71,7 +71,7 @@ export DOCKER_BUILDKIT=1
 echo "Pulling base image..."
 docker pull gcr.io/cloud-marketplace-tools/k8s/deployer_helm/onbuild:latest || { echo "Failed to pull base image"; exit 1; }
 
-# Build and push the image with the version tag (1.0.3)
+# Build and push the image with the version tag (1.0.8)
 echo "Building and pushing version-tagged image..."
 docker buildx build --platform linux/amd64 \
     --no-cache \

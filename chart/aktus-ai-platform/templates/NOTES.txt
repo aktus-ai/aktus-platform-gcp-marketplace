@@ -1,6 +1,6 @@
 Thank you for installing {{ .Chart.Name }}.
 
-{{- if and (index .Values "networkSettings.researchServiceIp") (index .Values "networkSettings.knowledgeAssistantIp") }}
+{{- if and (index .Values "networkSettings.researchServiceIp") }}
 
 To manually configure the static IPs for the LoadBalancer services, run the following commands:
 
@@ -8,17 +8,12 @@ To manually configure the static IPs for the LoadBalancer services, run the foll
    kubectl patch svc aktus-research -n {{ .Release.Namespace }} --type='json' \
    -p='[{"op": "replace", "path": "/spec/loadBalancerIP", "value":"{{ index .Values "networkSettings.researchServiceIp" }}"}]'
 
-2. Set up the Knowledge Assistant static IP:
-   kubectl patch svc aktus-knowledge-assistant -n {{ .Release.Namespace }} --type='json' \
-   -p='[{"op": "replace", "path": "/spec/loadBalancerIP", "value":"{{ index .Values "networkSettings.knowledgeAssistantIp" }}"}]'
-
-3. Update the Knowledge Assistant WebSocket URL:
+2. Update the Knowledge Assistant WebSocket URL:
    kubectl set env deployment/aktus-knowledge-assistant -n {{ .Release.Namespace }} \
    VITE_SOCKET_URL="ws://{{ index .Values "networkSettings.researchServiceIp" }}:8080/chat"
 
 The application services can be accessed at:
 - Research Service: http://{{ index .Values "networkSettings.researchServiceIp" }}:8080
-- Knowledge Assistant: http://{{ index .Values "networkSettings.knowledgeAssistantIp" }}:8080
 {{- else }}
 
 Your application is deployed. To access the services, find the external IPs with:

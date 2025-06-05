@@ -1,3 +1,6 @@
+# Production Mode Configuration
+enableProductionMode: false
+
 # Enable/disable services
 rabbitmq:
   enabled: true
@@ -49,12 +52,8 @@ global:
   # Pass network settings to subcharts
   networkSettings:
     researchServiceIp: ""
-    knowledgeAssistantIp: ""
-    databaseServiceIp: ""
-    embeddingServiceIp: ""
 
   storageSettings:
-    modelsBucketName: ""
     docUploadBucketName: ""
     docProcessingBucketName: ""
     extractedDataBucketName: ""
@@ -136,10 +135,6 @@ aktus-inference-service:
         memory: "72Gi" #"32Gi"
         nvidia.com/gpu: 1
         ephemeral-storage: "5Gi"
-
-# Network configuration is now in the global section
-# networkSettings.researchServiceIp: ""
-# networkSettings.knowledgeAssistantIp: ""
 
 # Application Services
 aktus-research-service:
