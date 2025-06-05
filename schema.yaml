@@ -3,63 +3,66 @@
 x-google-marketplace:
   schemaVersion: v2
   applicationApiVersion: v1beta1
-  publishedVersion: "1.0.3"
+  publishedVersion: "1.0.8"
   publishedVersionMetadata:
     releaseNote: Initial release of Aktus AI Platform.
   managedUpdates:
     kalmSupported: false
-  # clusterConstraints:
-  #   resources:
-  #   - replicas: 2  # Entry for non-GPU resources
-  #     requests:
-  #       cpu: 28000m  # Increased from 6000m to accommodate MDI's 16 cores + other services
-  #       memory: 80Gi  # Increased from 24Gi to accommodate MDI's 64Gi + other services
-  #   - requests:  # Entry for GPU resources
-  #       gpu:
-  #         nvidia.com/gpu:
-  #           limits: 1
-  #           platforms:
-  #           - nvidia-tesla-t4
-  #           - nvidia-tesla-v100
-  #           - nvidia-tesla-p100
-  #           - nvidia-tesla-p4
-  #           - nvidia-tesla-a100
+  clusterConstraints:
+    resources:
+    - replicas: 2
+      requests:
+        cpu: 28000m
+        memory: 80Gi
+    - requests:
+        gpu:
+          nvidia.com/gpu:
+            limits: 1
+            platforms:
+            - nvidia-tesla-a100
   images:
     aktus-inference:
       properties:
         aktus-inference-service.aktusInference.image:
           type: FULL
-          default: gcr.io/aktus-ai-platform-public/aktus-platform-marketplace/aktus-inference:1.0.3
+          default: gcr.io/aktus-ai-platform-public/aktus-platform-marketplace/aktus-inference:1.0.8
     aktus-multimodal-data-ingestion:
       properties:
         aktus-multimodal-data-ingestion-service.aktusMdi.image:
           type: FULL
-          default: gcr.io/aktus-ai-platform-public/aktus-platform-marketplace/multimodal-data-ingestion:1.0.3
+          default: gcr.io/aktus-ai-platform-public/aktus-platform-marketplace/multimodal-data-ingestion:1.0.8
     aktus-research:
       properties:
         aktus-research-service.aktusResearch.image:
           type: FULL
-          default: gcr.io/aktus-ai-platform-public/aktus-platform-marketplace/aktus-research:1.0.3
+          default: gcr.io/aktus-ai-platform-public/aktus-platform-marketplace/aktus-research:1.0.8
     aktus-database:
       properties:
         aktus-database-service.aktusDatabase.image:
           type: FULL
-          default: gcr.io/aktus-ai-platform-public/aktus-platform-marketplace/aktus-database:1.0.3
+          default: gcr.io/aktus-ai-platform-public/aktus-platform-marketplace/aktus-database:1.0.8
     aktus-embedding:
       properties:
         aktus-embedding-service.aktusEmbedding.image:
           type: FULL
-          default: gcr.io/aktus-ai-platform-public/aktus-platform-marketplace/aktus-embedding:1.0.3
+          default: gcr.io/aktus-ai-platform-public/aktus-platform-marketplace/aktus-embedding:1.0.8
     aktus-knowledge-assistant:
       properties:
         aktus-knowledge-assistant-service.aktusKnowledgeAssistant.image:
           type: FULL
-          default: gcr.io/aktus-ai-platform-public/aktus-platform-marketplace/aktus-knowledge-assistant:1.0.3
+          default: gcr.io/aktus-ai-platform-public/aktus-platform-marketplace/aktus-knowledge-assistant:1.0.8
 
 form:
 - widget: help
   description: >
     <div style="font-family: 'Google Sans', Arial, sans-serif; max-width: 850px; margin: 0 auto; padding: 24px; border-radius: 12px; background: #fff; box-shadow: 0 2px 10px rgba(0,0,0,0.08); color: #202124;">
+      
+      <!-- 14 Days Trial Card - Minimal & Elegant -->
+      <div style="background: linear-gradient(135deg, rgba(102, 126, 234, 0.08) 0%, rgba(118, 75, 162, 0.06) 100%); backdrop-filter: blur(10px); border: 1px solid rgba(102, 126, 234, 0.1); border-radius: 8px; padding: 16px 20px; margin-bottom: 24px; text-align: center;">
+        <div style="font-size: 20px; font-weight: 500; color: #1a73e8; margin-bottom: 4px;">14-Day Free Trial</div>
+        <div style="font-size: 13px; color: #5f6368; font-weight: 400;">Experience full platform capabilities</div>
+      </div>
+      
       <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 16px; border-radius: 8px; margin-bottom: 20px; text-align: center; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);">
         <h2 style="margin: 0 0 8px 0; font-weight: 600; color: #fff; font-size: 18px;">🎥 Video Installation Guide</h2>
         <p style="margin: 0 0 12px 0; color: rgba(255,255,255,0.9); font-size: 13px;">Step-by-step video covering cluster setup, configuration, and deployment</p>
@@ -220,6 +223,7 @@ properties:
     type: string
     title: "Step 1: Application Name"
     description: "Name for your Aktus AI Platform deployment"
+    default: "aktus-ai-platform-marketplace"
     x-google-marketplace:
       type: NAME
       
@@ -266,32 +270,8 @@ properties:
     title: "Step 2: Research Service Static IP"
     description: "Static IP address for the Research Service (WebSocket backend). Must be in the same region as your GKE cluster."
     default: ""
-  
-  global.networkSettings.databaseServiceIp:
-    type: string
-    title: "Step 2: Database Service Static IP"
-    description: "Static IP address for the Database Service. Must be in the same region as your GKE cluster."
-    default: ""
-
-  global.networkSettings.embeddingServiceIp:
-    type: string
-    title: "Step 2: Embedding Service Static IP"
-    description: "Static IP address for the Embedding Service. Must be in the same region as your GKE cluster."
-    default: ""
-
-  global.networkSettings.knowledgeAssistantIp:
-    type: string
-    title: "Step 2: Knowledge Assistant Static IP"
-    description: "Static IP address for the Knowledge Assistant frontend. Must be in the same region as your GKE cluster."
-    default: ""
 
   # Storage Configuration (Global)
-  global.storageSettings.modelsBucketName:
-    type: string
-    title: "Step 3: Models Storage Bucket (Global)"
-    description: "GCS bucket name for storing ML models and artifacts"
-    default: ""
-  
   global.storageSettings.docUploadBucketName:
     type: string
     title: "Step 3: Document Upload Bucket (Global)"
@@ -311,46 +291,10 @@ properties:
     default: ""
   
   # Step 4: Service Selection
-  aktus-database-service.enabled:
+  enableProductionMode:
     type: boolean
-    title: "Step 4: Enable Database Service"
-    description: "Enable the database manager service (recommended for full functionality)"
-    default: false
-    
-  aktus-knowledge-assistant-service.enabled:
-    type: boolean
-    title: "Step 4: Enable Knowledge Assistant"
-    description: "Enable the knowledge assistant service for interactive chat (recommended for full functionality)"
-    default: false
-    
-  aktus-inference-service.enabled:
-    type: boolean
-    title: "Step 4: Enable Inference Service"
-    description: "Enable the model inference service (requires GPU resources and Hugging Face key)"
-    default: false
-  
-  aktus-embedding-service.enabled:
-    type: boolean
-    title: "Step 4: Enable Embedding Service"
-    description: "Enable the vector embedding service (requires OpenAI API key)"
-    default: false
-    
-  aktus-research-service.enabled:
-    type: boolean
-    title: "Step 4: Enable Research Service"
-    description: "Enable the research service for advanced analytics"
-    default: false
-    
-  aktus-multimodal-data-ingestion-service.enabled:
-    type: boolean
-    title: "Step 4: Enable Multimodal Data Ingestion"
-    description: "Enable the multimodal data ingestion service for document processing"
-    default: false
-    
-  qdrant-service.enabled:
-    type: boolean
-    title: "Step 4: Enable Qdrant Vector Database"
-    description: "Enable the Qdrant vector database service for vector storage"
+    title: "Step 4: Enable Production Mode"
+    description: "Enable all required services for full Aktus AI Platform functionality (Database, Knowledge Assistant, Inference, Embedding, Research, Data Ingestion, and Vector Database)"
     default: false
 
   # Step 5: API Keys & Secrets
@@ -378,10 +322,7 @@ required:
   - secrets.huggingfaceLoginKey
   - gcpServiceAccountEmail
   - global.networkSettings.researchServiceIp
-  - global.networkSettings.databaseServiceIp
-  - global.networkSettings.embeddingServiceIp
-  - global.networkSettings.knowledgeAssistantIp
-  - global.storageSettings.modelsBucketName
   - global.storageSettings.docUploadBucketName
   - global.storageSettings.docProcessingBucketName
   - global.storageSettings.extractedDataBucketName
+  - enableProductionMode
