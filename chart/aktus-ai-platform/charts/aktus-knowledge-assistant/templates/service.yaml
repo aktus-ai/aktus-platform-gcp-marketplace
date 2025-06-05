@@ -6,7 +6,6 @@ metadata:
     app: aktus-knowledge-assistant-service
 spec:
   type: LoadBalancer
-  loadBalancerIP: "{{ .Values.global.networkSettings.knowledgeAssistantIp }}"
   ports:
     - port: 8080
       targetPort: 80
