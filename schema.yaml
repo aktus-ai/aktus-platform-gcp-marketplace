@@ -9,21 +9,22 @@ x-google-marketplace:
   managedUpdates:
     kalmSupported: false
   # clusterConstraints:
-  #   resources:
-  #   - replicas: 2  # Entry for non-GPU resources
-  #     requests:
-  #       cpu: 28000m  # Increased from 6000m to accommodate MDI's 16 cores + other services
-  #       memory: 80Gi  # Increased from 24Gi to accommodate MDI's 64Gi + other services
-  #   - requests:  # Entry for GPU resources
-  #       gpu:
-  #         nvidia.com/gpu:
-  #           limits: 1
-  #           platforms:
-  #           - nvidia-tesla-t4
-  #           - nvidia-tesla-v100
-  #           - nvidia-tesla-p100
-  #           - nvidia-tesla-p4
-  #           - nvidia-tesla-a100
+  clusterConstraints:
+    resources:
+    - replicas: 2  # Entry for non-GPU resources
+      requests:
+        cpu: 28000m  # Increased from 6000m to accommodate MDI's 16 cores + other services
+        memory: 80Gi  # Increased from 24Gi to accommodate MDI's 64Gi + other services
+    - requests:  # Entry for GPU resources
+        gpu:
+          nvidia.com/gpu:
+            limits: 1
+            platforms:
+            - nvidia-tesla-t4
+            - nvidia-tesla-v100
+            - nvidia-tesla-p100
+            - nvidia-tesla-p4
+            - nvidia-tesla-a100
   images:
     aktus-inference:
       properties:
