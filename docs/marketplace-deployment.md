@@ -89,8 +89,19 @@ kubectl get services -n <NAMESPACE>
 
 ## 🌐 Access Services
 
-- **Research Service:** `http://<research-ip>:8080`
-- **Knowledge Assistant:** `http://<knowledge-endpoint>:3000`
+To access the frontend service, i.e. *Aktus Knowledge Assistant*, follow the steps below:
+
+1. Locate your GKE cluster on Kubernetes Engine homepage of your GCP account.
+    
+2. Under the **Applications** section, find your application and click on it.
+   
+3. Next, find the **aktus-knowledge-assistant** `service` and open it. 
+   
+4. You will find the endpoint to this application listed as **External endpoints**.
+   
+5. Sign up on the landing page and start using the platform. 
+   
+
 
 ---
 
