@@ -35,41 +35,33 @@
 
 | Field                         | Value                                                      |
 | ----------------------------- | ---------------------------------------------------------- |
-| **Application Name**    | `aktus-ai-platform-marketplace`                          |
-| **Namespace**           | `platform`                                               |
-| **Service Account**     | `aktus-platform-sa`                                      |
-| **GCP Service Account** | `aktus-platform-sa@<PROJECT_ID>.iam.gserviceaccount.com` |
+| **Application Name**    | The application name from Step 1 during application installtions, e.g. `aktus-ai-platform-marketplace`.                          |
+| **Namespace**           | The `namespace` from Step 1 of app installtions (`NAMESPACE`), e.g. `platform`.                                               |
+| **Service Account**     | The name of the service account created during app installation (`SERVICE-ACCOUNT-NAME`), e.g.`aktus-platform-sa`.                                     |
+| **GCP Service Account** | `<SERVICE-ACCOUNT-NAME>@<PROJECT_ID>.iam.gserviceaccount.com` |
 | **Enable GCS Access**   | ✅ Checked                                                 |
 
 ### Network Configuration
 
-Enter your static IP addresses from Step 2:
+Enter your static IP address from Step 2:
 
 - **Research Service IP:** `XX.XX.XX.XX`
-- **Database Service IP:** `XX.XX.XX.XX`
-- **Embedding Service IP:** `XX.XX.XX.XX`
-- **Knowledge Assistant IP:** `XX.XX.XX.XX`
 
 ### Storage Configuration
 
 Enter your bucket names from Step 3:
 
-- **Models Bucket:** `bucket-models`
+**NOTE**: GCS bucket name MUST be globally unique.
+
 - **Document Upload Bucket:** `bucket-document-upload`
 - **Processing Bucket:** `bucket-document-processing`
 - **Extracted Data Bucket:** `bucket-extracted-data`
 
 ### Service Selection
 
-Enable all services:
+Enable Production mode:
 
-- ✅ Database Service
-- ✅ Knowledge Assistant
-- ✅ Inference Service
-- ✅ Embedding Service
-- ✅ Research Service
-- ✅ Multimodal Data Ingestion
-- ✅ Qdrant Vector Database
+- ✅ Enable Production Mode
 
 ### API Keys
 
@@ -89,8 +81,8 @@ Enable all services:
 ### Check Deployment Status
 
 ```bash
-kubectl get pods -n aktus-platform
-kubectl get services -n aktus-platform
+kubectl get pods -n <NAMESPACE>
+kubectl get services -n <NAMESPACE>
 ```
 
 ---
@@ -98,7 +90,7 @@ kubectl get services -n aktus-platform
 ## 🌐 Access Services
 
 - **Research Service:** `http://<research-ip>:8080`
-- **Knowledge Assistant:** `http://<knowledge-assistant-ip>:3000`
+- **Knowledge Assistant:** `http://<knowledge-endpoint>:3000`
 
 ---
 
@@ -111,7 +103,7 @@ kubectl get services -n aktus-platform
 ### Monitor Progress
 
 ```bash
-kubectl get pods -n aktus-platform -w
+kubectl get pods -n <NAMESPACE> -w
 ```
 
 ---
