@@ -106,6 +106,8 @@ gcloud projects add-iam-policy-binding $PROJECT_ID \
 ```
 
 ### Setup Workload Identity
+
+**NOTE**: The value of `YOUR-APPLICATION-NAME` is the same as the name you chose in Step #1 of the application installation.
 ```bash
 kubectl create namespace $NAMESPACE
 
@@ -113,10 +115,10 @@ export PROJECT_NUMBER=$(gcloud projects describe $PROJECT_ID --format="value(pro
 
 gcloud iam service-accounts add-iam-policy-binding $SERVICE_ACCOUNT_EMAIL \
   --role="roles/iam.workloadIdentityUser" \
-  --member="principal://iam.googleapis.com/projects/$PROJECT_NUMBER/locations/global/workloadIdentityPools/$PROJECT_ID.svc.id.goog/subject/ns/$NAMESPACE/sa/aktus-ai-platform-marketplace-serviceaccount"
+  --member="principal://iam.googleapis.com/projects/$PROJECT_NUMBER/locations/global/workloadIdentityPools/$PROJECT_ID.svc.id.goog/subject/ns/$NAMESPACE/sa/<YOUR-APPLICATION-NAME>-serviceaccount"
 
 gcloud projects add-iam-policy-binding $PROJECT_ID \
-  --member="principal://iam.googleapis.com/projects/$PROJECT_NUMBER/locations/global/workloadIdentityPools/$PROJECT_ID.svc.id.goog/subject/ns/$NAMESPACE/sa/aktus-ai-platform-marketplace-serviceaccount" \
+  --member="principal://iam.googleapis.com/projects/$PROJECT_NUMBER/locations/global/workloadIdentityPools/$PROJECT_ID.svc.id.goog/subject/ns/$NAMESPACE/sa/<YOUR-APPLICATION-NAME>-serviceaccount" \
   --role="roles/storage.objectUser"
 ```
 
