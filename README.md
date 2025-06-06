@@ -21,12 +21,26 @@ Deploy Aktus AI Platform on Google Cloud Marketplace with our comprehensive depl
 
 ## 📋 Prerequisites
 
+### Required Resources
 - Google Cloud Project with billing enabled
 - Google Cloud SDK installed
-- `kubectl` installed  
+- `kubectl` installed
 - Project Owner permissions
 - OpenAI API key
 - Hugging Face login token
+
+### Cluster Requirements
+- Minimum 4 nodes
+  - `e2-standard-16` x 3
+  - `a2-highgpu-1g` (NVIDIA Tesla A100 40Gi)
+
+
+### Required GCP Resources
+- 1 External Static IP address
+- 3 GCS Buckets:
+  - Document Upload Bucket
+  - Document Processing Bucket
+  - Extracted Data Bucket
 
 ---
 
@@ -67,7 +81,7 @@ Deploy Aktus AI Platform on Google Cloud Marketplace with our comprehensive depl
 | **1** | [Create_Cluster](https://drive.google.com/file/d/1jN72wLWiD_R-nyb-ry0W6oLpD9LY16Rv/view?usp=sharing) | `30 min` | Cluster + Identity |
 | **2** | [GCSFuse_Cluster](https://drive.google.com/file/d/19wrUxLJXTvxQqUjrmbE3bfO3EHhNuvZh/view?usp=sharing) | `30 min` | Cluster GCS Fuse |
 | **3** | [GCSFuse_Node](https://drive.google.com/file/d/1z2T3Al1JHzTSJB_VwrAz7C1XL636UfQw/view?usp=sharing) | `10 min` | Node GCS Fuse |
-| **4** | [Create_IP_Addresses](https://drive.google.com/file/d/1p-TYGfNnmxeVhxobTVmoXr5i7H9w-OZP/view?usp=sharing) | `5 min` | Static IPs |
+| **4** | [Create_IP_Address](https://drive.google.com/file/d/1p-TYGfNnmxeVhxobTVmoXr5i7H9w-OZP/view?usp=sharing) | `5 min` | Static IPs |
 | **5** | [Create_Buckets](https://drive.google.com/file/d/194XKRYR4rNB7rdlhfhMxtLPWRdEgJKd1/view?usp=sharing) | `6 min` | GCS buckets |
 | **6** | [Deploy](https://drive.google.com/file/d/1Hz256McmAUep-yTbBIa0vW2W_aRTCxUK/view?usp=sharing) | `10 min` | Marketplace deploy |
 | **7** | ⏱️ **Wait 5 minutes** | — | Pod initialization |
