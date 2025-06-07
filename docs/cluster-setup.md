@@ -57,6 +57,30 @@ gcloud container node-pools create gpu-pool \
   --workload-metadata=GKE_METADATA
 ```
 
+### Enable GCSFuse CSI Driver
+```bash
+gcloud container clusters update $CLUSTER_NAME \
+  --update-addons GcsFuseCsiDriver=ENABLED \
+  --location=$REGION
+```
+
+### Update Node Pools for GCSFuse
+> **Note:** Run this command for each node pool created earlier
+
+```bash
+# Update default node pool
+gcloud container node-pools update default-pool \
+  --cluster=$CLUSTER_NAME \
+  --location=$REGION \
+  --workload-metadata=GKE_METADATA
+
+# Update GPU node pool
+gcloud container node-pools update gpu-pool \
+  --cluster=$CLUSTER_NAME \
+  --location=$REGION \
+  --workload-metadata=GKE_METADATA
+```
+
 ---
 
 ## 🔐 Identity Configuration
