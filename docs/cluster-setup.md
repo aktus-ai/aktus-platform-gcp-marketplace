@@ -12,11 +12,73 @@
 
 ## 📋 Prerequisites
 
-- Google Cloud Project with billing enabled
-- Google Cloud SDK installed
-- Project Owner permissions
+- A Google Cloud project with billing enabled
+- Access to [Google Cloud Shell](https://console.cloud.google.com/)
 
 ---
+## 🛠️ CLI Deployment Commands (Google Cloud Shell)
+
+These commands are intended to be run **after cluster creation** directly in **Google Cloud Shell**, which comes pre-authenticated and pre-configured with the `gcloud` CLI and `kubectl`.
+
+Before proceeding, ensure you're operating within the correct project. You can confirm or change the active project with:
+
+```bash
+gcloud config set project <project-id>
+```
+## ⚙️ Deployment Steps
+
+### 1. Get GKE Cluster Credentials
+
+```bash
+gcloud container clusters get-credentials <cluster-name> \
+  --region <region> \
+  --project <project-id>
+```
+- **Purpose**: Connects your local `kubectl` context to the specified GKE cluster.
+- **<region>**: e.g., `us-central1`
+- **<project-id>**: Found in the top-left corner of the GCP Console.
+
+### 2. Enable GCS Fuse CSI Driver on the Cluster
+```bash
+gcloud container clusters update <cluster-name> \
+  --update-addons GcsFuseCsiDriver=ENABLED \
+  --location=<region>
+```
+- **Purpose**: Enables the GCS Fuse CSI driver to support GCS bucket mounting via Kubernetes.
+
+### 3. Update Node Pool to Support Workload Identity
+```bash
+gcloud container node-pools update <pool-name> \
+  --cluster=<cluster-name> \
+  --location=<region> \
+  --workload-metadata=GKE_METADATA
+```
+- **Purpose**: Configures nodes to support Workload Identity for secure service account access. Done twice, one for each node pool -- once for non-gpu-pool, once again for gpu-pool.
+
+### 4. Create a Kubernetes Namespace
+```bash
+kubectl create namespace <namespace>
+```
+- **Purpose**: Sets up a dedicated namespace for your application resources.
+
+### 5. Bind IAM Policy to GCP Service Account
+```bash
+gcloud iam service-accounts add-iam-policy-binding <service-account-email> \
+  --role="roles/iam.workloadIdentityUser" \
+  --member="principal://iam.googleapis.com/projects/<project-number>/locations/global/workloadIdentityPools/<project-id>.svc.id.goog/subject/ns/<namespace>/sa/<your-application-name>-serviceaccount"
+```
+- **Purpose**: Grants the Kubernetes service account permission to impersonate the GCP IAM service account.
+- **<service-account-email>**: e.g., `my-app-sa@my-project.iam.gserviceaccount.com`
+- **<project-number>**: Found under **Project Settings** (top-right corner menu in the GCP Console).
+- **<your-application-name>**: Your application’s name (used in the Kubernetes service account name).
+
+### 6. Grant Storage Access to Kubernetes Service Account
+```bash
+gcloud projects add-iam-policy-binding <project-id> \
+  --member="principal://iam.googleapis.com/projects/<project-number>/locations/global/workloadIdentityPools/<project-id>.svc.id.goog/subject/ns/<namespace>/sa/<your-application-name>-serviceaccount" \
+  --role="roles/storage.objectUser"
+```
+- **Purpose**: Grants the Kubernetes service account permission to access GCS buckets as a Storage Object User.
 
 ## ⚡ Quick Setup
 
