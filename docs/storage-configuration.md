@@ -64,13 +64,6 @@ echo "Extracted Data Bucket: $EXTRACTED_DATA_BUCKET"
 gsutil ls -p $PROJECT_ID | grep aktus
 ```
 
----
-
-## ⚠️ Model Files Required
-
-> **Important:** Upload required model weights to the models bucket before deployment.
-
-**Contact for model files:** [support@aktus.ai](mailto:support@aktus.ai)
 
 ---
 
