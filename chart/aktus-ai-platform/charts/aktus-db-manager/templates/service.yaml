@@ -6,9 +6,9 @@ metadata:
   annotations:
     cloud.google.com/load-balancer-type: "External"
 spec:
-  type: LoadBalancer
+  type: ClusterIP
   ports:
-    - port: 8080
+    - port: 80
       targetPort: http
       name: http
   selector:

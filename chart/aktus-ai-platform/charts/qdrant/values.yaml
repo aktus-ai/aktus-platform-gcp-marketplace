@@ -4,7 +4,7 @@ qdrant:
   port: 6333
   serviceAccount: "{{ .Release.Name }}-serviceaccount"
   service:
-    type: LoadBalancer
+    type: ClusterIP
     port: 6333
   storage:
     bucketName: "aktus-ai-platform-qdrant"
