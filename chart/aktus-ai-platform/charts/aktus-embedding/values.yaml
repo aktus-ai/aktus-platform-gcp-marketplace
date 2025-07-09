@@ -14,7 +14,7 @@ aktusEmbedding:
   mdiService:
     endpoint: "http://aktus-multimodal-data-ingestion:5315"
   dbManager:
-    host: "http://aktus-database:8080"
+    host: "http://aktus-database"
   paths:
     extractedData: "/extracted_data"
     docUpload: "/document_upload"
@@ -25,11 +25,11 @@ aktusEmbedding:
     requests:
       cpu: "500m"
       memory: "1Gi"
-      ephemeral-storage: "2Gi"
+      ephemeral-storage: "20Gi"
     limits:
       cpu: "1000m"
       memory: "2Gi"
-      ephemeral-storage: "2Gi"
+      ephemeral-storage: "20Gi"
   
   livenessProbe:
     initialDelaySeconds: 30

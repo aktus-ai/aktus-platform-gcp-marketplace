@@ -129,12 +129,12 @@ aktus-inference-service:
         cpu: "1000" #"4000m"
         memory: "4Gi" #"16Gi"
         nvidia.com/gpu: 1
-        ephemeral-storage: "5Gi"
+        ephemeral-storage: "20Gi"
       limits:
         cpu: "10000" #"8000m"
         memory: "72Gi" #"32Gi"
         nvidia.com/gpu: 1
-        ephemeral-storage: "5Gi"
+        ephemeral-storage: "20Gi"
 
 # Application Services
 aktus-research-service:
@@ -144,7 +144,7 @@ aktus-research-service:
   aktusResearch:
     image: us-docker.pkg.dev/aktus-ai-platform-public/aktus-platform-marketplace/aktus-research:v1.0.0
     service:
-      type: ClusterIP
+      type: LoadBalancer
       port: 8080
     modelInference:
       address: "aktus-inference:50051"
@@ -178,11 +178,11 @@ aktus-multimodal-data-ingestion-service:
       requests:
         cpu: "1000m"
         memory: "4Gi"
-        ephemeral-storage: 5Gi
+        ephemeral-storage: 20Gi
       limits:
         cpu: "16000m"
         memory: "64Gi"
-        ephemeral-storage: 5Gi
+        ephemeral-storage: 20Gi
     rabbitmq:
       host: "rabbitmq"
       port: "5672"
@@ -214,11 +214,11 @@ aktus-embedding-service:
       requests:
         cpu: "1000m"
         memory: "2Gi"
-        ephemeral-storage: "5Gi"
+        ephemeral-storage: "20Gi"
       limits:
         cpu: "14000m"
         memory: "60Gi"
-        ephemeral-storage: "5Gi"
+        ephemeral-storage: "20Gi"
     storage:
       extractedData:
         bucketName: "aktus-platform-extracted-data"
@@ -233,7 +233,7 @@ aktus-embedding-service:
     mdiService:
       endpoint: "http://aktus-multimodal-data-ingestion:5315"
     dbManager:
-      host: "http://aktus-database:8080"
+      host: "http://aktus-database"
 
 # PostgreSQL configuration
 aktus-postgres-service:
@@ -275,7 +275,7 @@ qdrant:
     serviceAccount: "${RELEASE_NAME}-serviceaccount"
     port: 6333
     service:
-      type: LoadBalancer
+      type: ClusterIP
       port: 6333
     persistence:
       enabled: true

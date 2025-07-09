@@ -51,9 +51,9 @@ aktusInference:
       cpu: "10000m"
       memory: "72Gi"
       nvidia.com/gpu: 1
-      ephemeral-storage: "5Gi"
+      ephemeral-storage: "20Gi"
     limits:
       cpu: "10000m"
       memory: "72Gi"
       nvidia.com/gpu: 1
-      ephemeral-storage: "5Gi"
+      ephemeral-storage: "20Gi"

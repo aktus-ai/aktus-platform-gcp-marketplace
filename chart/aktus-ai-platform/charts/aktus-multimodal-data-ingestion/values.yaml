@@ -45,11 +45,11 @@ aktusMdi:
     requests:
       cpu: "500m"
       memory: "1Gi"
-      ephemeral-storage: "2Gi"
+      ephemeral-storage: "20Gi"
     limits:
       cpu: "1000m"
       memory: "2Gi"
-      ephemeral-storage: "5Gi"
+      ephemeral-storage: "20Gi"
   livenessProbe:
     initialDelaySeconds: 30
     periodSeconds: 10
