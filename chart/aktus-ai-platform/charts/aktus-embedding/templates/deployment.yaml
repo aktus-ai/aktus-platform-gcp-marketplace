@@ -67,7 +67,7 @@ spec:
             - name: ENV
               value: "dev"
             - name: MONGO_URL
-              value: mongodb+srv://amirnajian:adZLQcPi9vUtt6V7@cluster0.4m96t.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
+              value: mongodb+srv://
             - name: MONGO_DATABASE_NAME
               value: report-gen-db-dev
             - name: MONGO_COLLECTION_NAME
