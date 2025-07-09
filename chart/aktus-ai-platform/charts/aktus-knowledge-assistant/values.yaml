@@ -8,7 +8,7 @@ aktusKnowledgeAssistant:
     loadBalancerIP: ""
   
   # viteSocketUrl: "ws://aktus-research:8080/chat"
-  # viteApiBaseUrl: "http://aktus-database:8080"
+  # viteApiBaseUrl: "http://aktus-database"
   # viteWaitlistFormId: "c989a45ed2991b0cb7455a37ced244f0"
   # viteApiEmbedUrl: "http://aktus-embedding:8080"
   # researchServiceUrl: "http://aktus-research:8080"
