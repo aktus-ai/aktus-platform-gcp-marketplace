@@ -74,7 +74,9 @@ spec:
             - name: VDB_ENDPOINT
               value: http://aktus-embedding:8080
             - name: DB_MANAGER_ENDPOINT
-              value: http://aktus-database:8080
+              value: http://aktus-database
+            - name: REDIS_BACKEND_URI
+              value: redis
           volumeMounts:
             - name: document-upload
               mountPath: {{ .Values.aktusResearch.paths.docUpload }}

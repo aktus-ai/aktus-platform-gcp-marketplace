@@ -40,5 +40,11 @@ spec:
               value: "http://{{ .Values.global.networkSettings.researchServiceIp }}:8080"
             - name: VITE_API_EMBED_URL
               value: "http://{{ .Values.global.networkSettings.researchServiceIp }}:8080/embeddings"
+            - name: VITE_GOOGLE_API_KEY
+              value: apikey-test
+            - name: VITE_GOOGLE_APP_ID
+              value: "689632022281-test"
+            - name: VITE_GOOGLE_CLIENT_ID
+              value: 689632022281-test
           resources:
             {{- toYaml .Values.aktusKnowledgeAssistant.resources | nindent 12 }}

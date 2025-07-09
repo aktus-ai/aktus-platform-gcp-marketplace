@@ -66,6 +66,16 @@ spec:
               value: "QDRANT"
             - name: ENV
               value: "dev"
+            - name: MONGO_URL
+              value: mongodb+srv://amirnajian:adZLQcPi9vUtt6V7@cluster0.4m96t.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
+            - name: MONGO_DATABASE_NAME
+              value: report-gen-db-dev
+            - name: MONGO_COLLECTION_NAME
+              value: report_rag
+            - name: MONGO_INDEX_NAME
+              value: reasoning_platform_index
+            - name: MONGO_TEXT_KEY
+              value: content
             - name: COMMUNITY_REPORT_GRAPH_PROMPT_PATH
               value: "/app/graph/prompts/community_report_graph.txt"
             - name: EXTRACT_CLAIMS_PROMPT_PATH
@@ -93,11 +103,11 @@ spec:
             requests:
               cpu: "14000m"
               memory: "60Gi"
-              ephemeral-storage: "5Gi"
+              ephemeral-storage: "20Gi"
             limits:
               cpu: "14000m"
               memory: "60Gi"
-              ephemeral-storage: "5Gi"
+              ephemeral-storage: "20Gi"
             {{- end }}
       volumes:
         {{- if .Values.global.enableGCSAccess }}

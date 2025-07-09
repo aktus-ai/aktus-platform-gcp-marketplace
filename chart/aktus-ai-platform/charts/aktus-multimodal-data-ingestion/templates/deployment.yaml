@@ -16,7 +16,7 @@ spec:
         app: aktus-multimodal-data-ingestion-service
       annotations:
         gke-gcsfuse/volumes: "true"
-        gke-gcsfuse/ephemeral-storage-limit: "5Gi"
+        gke-gcsfuse/ephemeral-storage-limit: "20Gi"
     spec:
       terminationGracePeriodSeconds: 60
       serviceAccountName: "{{ .Release.Name }}-serviceaccount"
@@ -72,6 +72,10 @@ spec:
                   key: rabbitmq-password
             - name: REDIS_BACKEND_URI
               value: "redis://{{ .Values.aktusMdi.redis.host }}/0"
+            - name: REDIS_HOST
+              value: redis
+            - name: REDIS_DB
+              value: "0"
             - name: VDB_ENDPOINT
               value: "http://{{ .Values.aktusMdi.vectorEmbedding.host }}/vectorindex/embed_data"
             - name: OPENAI_API_KEY
