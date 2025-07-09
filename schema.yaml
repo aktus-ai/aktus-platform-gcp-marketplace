@@ -3,7 +3,7 @@
 x-google-marketplace:
   schemaVersion: v2
   applicationApiVersion: v1beta1
-  publishedVersion: "1.0.8"
+  publishedVersion: "1.0.16"
   publishedVersionMetadata:
     releaseNote: Initial release of Aktus AI Platform.
   managedUpdates:
@@ -25,32 +25,32 @@ x-google-marketplace:
       properties:
         aktus-inference-service.aktusInference.image:
           type: FULL
-          default: gcr.io/aktus-ai-platform-public/aktus-platform-marketplace/aktus-inference:1.0.8
+          default: gcr.io/aktus-ai-platform-public/aktus-platform-marketplace/aktus-inference:1.0.16
     aktus-multimodal-data-ingestion:
       properties:
         aktus-multimodal-data-ingestion-service.aktusMdi.image:
           type: FULL
-          default: gcr.io/aktus-ai-platform-public/aktus-platform-marketplace/multimodal-data-ingestion:1.0.8
+          default: gcr.io/aktus-ai-platform-public/aktus-platform-marketplace/multimodal-data-ingestion:1.0.16
     aktus-research:
       properties:
         aktus-research-service.aktusResearch.image:
           type: FULL
-          default: gcr.io/aktus-ai-platform-public/aktus-platform-marketplace/aktus-research:1.0.8
+          default: gcr.io/aktus-ai-platform-public/aktus-platform-marketplace/aktus-research:1.0.16
     aktus-database:
       properties:
         aktus-database-service.aktusDatabase.image:
           type: FULL
-          default: gcr.io/aktus-ai-platform-public/aktus-platform-marketplace/aktus-database:1.0.8
+          default: gcr.io/aktus-ai-platform-public/aktus-platform-marketplace/aktus-database:1.0.16
     aktus-embedding:
       properties:
         aktus-embedding-service.aktusEmbedding.image:
           type: FULL
-          default: gcr.io/aktus-ai-platform-public/aktus-platform-marketplace/aktus-embedding:1.0.8
+          default: gcr.io/aktus-ai-platform-public/aktus-platform-marketplace/aktus-embedding:1.0.16
     aktus-knowledge-assistant:
       properties:
         aktus-knowledge-assistant-service.aktusKnowledgeAssistant.image:
           type: FULL
-          default: gcr.io/aktus-ai-platform-public/aktus-platform-marketplace/aktus-knowledge-assistant:1.0.8
+          default: gcr.io/aktus-ai-platform-public/aktus-platform-marketplace/aktus-knowledge-assistant:1.0.16
 
 form:
 - widget: help
@@ -100,7 +100,7 @@ form:
             <span style="background: #e8f0fe; color: #1a73e8; border-radius: 50%; width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; margin-right: 8px;">2</span>
             Create Static IP Addresses
           </h3>
-          <p style="margin: 12px 0 8px 32px; color: #5f6368; font-size: 14px; font-weight: 500;">⚠️ Create 4 external static IPs in your GCP project.</p>
+          <p style="margin: 12px 0 8px 32px; color: #5f6368; font-size: 14px; font-weight: 500;">⚠️ Create 1 external static IP in your GCP project.</p>
           <ul style="margin: 0 0 0 32px; padding-left: 16px; line-height: 1.8; color: #202124; font-size: 14px;">
           </ul>
           <div style="background: #e3f2fd; padding: 12px; border-radius: 6px; margin: 16px 0 0 32px; border-left: 3px solid #2196f3;">
@@ -113,7 +113,7 @@ form:
             <span style="background: #e8f0fe; color: #1a73e8; border-radius: 50%; width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; margin-right: 8px;">3</span>
             Create GCS Buckets
           </h3>
-          <p style="margin: 12px 0 8px 32px; color: #5f6368; font-size: 14px; font-weight: 500;">🗄️ Create 4 GCS buckets and provide names.</p>
+          <p style="margin: 12px 0 8px 32px; color: #5f6368; font-size: 14px; font-weight: 500;">🗄️ Create 3 GCS buckets and provide names.</p>
           <ul style="margin: 0 0 0 32px; padding-left: 16px; line-height: 1.8; color: #202124; font-size: 14px;">
           </ul>
           <div style="background: #e3f2fd; padding: 12px; border-radius: 6px; margin: 16px 0 0 32px; border-left: 3px solid #2196f3;">
@@ -126,7 +126,7 @@ form:
             <span style="background: #f8f9fa; color: #5f6368; border-radius: 50%; width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; margin-right: 8px;">4</span>
             Service Selection
           </h3>
-          <p style="margin: 12px 0 0 32px; color: #5f6368; font-size: 14px; font-weight: 500;">✅ Enable all services for complete functionality</p>
+          <p style="margin: 12px 0 0 32px; color: #5f6368; font-size: 14px; font-weight: 500;">✅ Enable Production Mode for complete functionality</p>
         </div>
         
         <div style="background: #fff; padding: 20px; border-radius: 10px; margin-top: 20px; margin-bottom: 8px; border: 1px solid #e8eaed; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
@@ -174,36 +174,6 @@ form:
             </a>
           </div>
         </div>
-        
-        <div style="background: #fff3cd; border: 2px solid #ffc107; border-radius: 12px; padding: 20px; margin: 24px 0; box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3);">
-          <div style="display: flex; align-items: flex-start; gap: 12px;">
-            <div style="font-size: 24px; color: #856404; margin-top: 2px;">⚠️</div>
-            <div>
-              <h3 style="margin: 0 0 12px 0; color: #856404; font-size: 18px; font-weight: 700;">IMPORTANT: Model Weights Required</h3>
-              <p style="margin: 0 0 12px 0; color: #856404; font-size: 14px; line-height: 1.6;">
-                <strong>Before deploying, you must upload the required model weights and files to your models bucket.</strong> 
-                The inference service requires specific model files to function properly.
-              </p>
-              <div style="background: rgba(133, 100, 4, 0.1); padding: 16px; border-radius: 8px; margin: 12px 0;">
-                <p style="margin: 0 0 8px 0; color: #856404; font-size: 14px; font-weight: 600;">📦 Required Model Files:</p>
-                <ul style="margin: 0; padding-left: 20px; color: #856404; font-size: 13px; line-height: 1.6;">
-                  <li>MiniCPM model weights and configuration files</li>
-                  <li>YOLO model weights for object detection</li>
-                  <li>Processor and tokenizer files</li>
-                  <li>Additional model artifacts and dependencies</li>
-                </ul>
-              </div>
-              <div style="background: #e8f4fd; border: 1px solid #bee5eb; border-radius: 8px; padding: 16px; margin: 12px 0;">
-                <p style="margin: 0 0 8px 0; color: #0c5460; font-size: 14px; font-weight: 600;">📧 Need Model Files?</p>
-                <p style="margin: 0; color: #0c5460; font-size: 13px; line-height: 1.5;">
-                  Contact Aktus AI support for access to the required model weights and detailed setup instructions:
-                  <br><strong>Email:</strong> <a href="mailto:support@aktus.ai" style="color: #0c5460; font-weight: 600;">support@aktus.ai</a>
-                </p>
-          </div>
-          </div>
-          </div>
-        </div>
-        
         <div style="text-align: center; margin-top: 24px; padding: 16px; background: #f8f9fa; border-radius: 8px;">
           <p style="color: #5f6368; font-size: 14px; margin: 0 0 8px 0;">📋 <strong>Quick Links:</strong> 
             <a href="https://cloud.google.com/kubernetes-engine/docs/how-to/persistent-volumes/cloud-storage-fuse-csi-driver" style="color: #1a73e8; text-decoration: none; font-weight: 500; margin: 0 8px;">GCS Fuse CSI Driver</a> | 

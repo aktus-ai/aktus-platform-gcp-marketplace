@@ -2,8 +2,8 @@
 apiVersion: v2
 name: aktus-platform
 description: Umbrella chart for Aktus AI platform
-appVersion: "1.0.8"
-version: 1.0.8
+appVersion: "1.0.16"
+version: 1.0.16
 type: application
 home: https://aktus.ai
 sources:
@@ -17,25 +17,25 @@ dependencies:
 
   # Databases and Message Queues (Level 1)
   - name: aktus-postgres-service
-    version: "1.0.8"
+    version: "1.0.16"
     repository: "file://./charts/postgres"
     tags:
       - infrastructure
 
   - name: rabbitmq
-    version: "1.0.8"
+    version: "1.0.16"
     repository: "file://./charts/rabbitmq"
     tags:
       - infrastructure
 
   - name: redis
-    version: "1.0.8"
+    version: "1.0.16"
     repository: "file://./charts/redis"
     tags:
       - infrastructure
 
   - name: qdrant
-    version: "1.0.8"
+    version: "1.0.16"
     repository: "file://./charts/qdrant"
     condition: enableProductionMode
     tags:
@@ -43,32 +43,32 @@ dependencies:
 
   # Core Services (Level 2)
   - name: aktus-database-service
-    version: "1.0.8"
+    version: "1.0.16"
     repository: "file://./charts/aktus-db-manager"
     condition: enableProductionMode
 
   - name: aktus-inference-service
-    version: "1.0.8"
+    version: "1.0.16"
     repository: "file://./charts/aktus-inference"
     condition: enableProductionMode
 
   # Application Services (Level 3)
   - name: aktus-research-service
-    version: "1.0.8"
+    version: "1.0.16"
     repository: "file://./charts/aktus-research"
     condition: enableProductionMode
 
   - name: aktus-multimodal-data-ingestion-service
-    version: "1.0.8"
+    version: "1.0.16"
     repository: "file://./charts/aktus-multimodal-data-ingestion"
     condition: enableProductionMode
 
   - name: aktus-embedding-service
-    version: "1.0.8"
+    version: "1.0.16"
     repository: "file://./charts/aktus-embedding"
     condition: enableProductionMode
 
   - name: aktus-knowledge-assistant-service
-    version: "1.0.8"
+    version: "1.0.16"
     repository: "file://./charts/aktus-knowledge-assistant"
     condition: enableProductionMode
