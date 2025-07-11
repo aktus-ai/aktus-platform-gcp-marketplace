@@ -15,7 +15,35 @@
 
 ---
 
-## ⚡ Quick Setup
+## 🌐 Step 2: Creating a Static IP Address in the GCP Interface
+
+A static external IP is required for the deployment process.
+
+---
+
+### 1. Open the IP Addresses Console page
+
+- In the Google Cloud Console, use the search bar at the top to search for **“IP addresses”**.
+
+---
+
+### 2. Reserve a Static IP
+
+- Click **“Reserve External Static IP Address”**.
+- Give the IP address a name.  
+  > 📝 **Tip**: Include the word `research` in the name to help identify its purpose later.
+
+- Click the **“Reserve”** button at the bottom of the form.
+
+---
+
+### 3. Complete Configuration
+
+- Return to the **Aktus deployment page** and paste the reserved IP address into the appropriate field labeled "Research Service Static IP".
+
+---
+
+## ⚡ Quick Setup via Cloud Shell
 
 ### Environment Variables
 ```bash
