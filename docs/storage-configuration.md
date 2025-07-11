@@ -11,11 +11,53 @@
 ## 📋 Prerequisites
 
 - Completed Steps 1-2
-- Cloud Storage API enabled
 
 ---
 
-## ⚡ Quick Setup
+## 🗂️ Steps 3: Create GCS Buckets
+
+To continue the deployment process, you'll need to create **three** Google Cloud Storage buckets—each with a different purpose.
+
+---
+
+### 1. Open the Buckets Console
+
+- From the [Google Cloud Console homepage](https://console.cloud.google.com/), use the search bar to look for **“Buckets”**.
+
+---
+
+### 2. Create the Buckets
+
+#### 🔹 Bucket 1: Document Upload
+
+- Click **“Create”**.
+- Choose a name for the bucket.  
+  > 📝 **Tip**: Use a name that clearly indicates its purpose, such as `aktus-doc-upload`.
+- Click **“Create”** and when prompted select confirm.
+
+#### 🔹 Bucket 2: Document Processing
+
+- Return to the buckets list and click **“Create”** again.
+- Choose a name like `aktus-doc-processing`.
+- Click **“Create”** to confirm.
+
+#### 🔹 Bucket 3: Extracted Data
+
+- Repeat the same process:
+  - Click **“Create”**.
+  - Name it something like `aktus-extracted-data`.
+  - Confirm the creation.
+
+---
+
+### 3. Complete Configuration
+
+- Once all three buckets are created, return to the **Aktus deployment page**.
+- Enter each bucket’s name into its corresponding form field.
+
+---
+
+## ⚡ Quick Setup for Cloud Shell
 
 ### Environment Variables
 ```bash
